@@ -3,26 +3,23 @@
 import * as luxon from "luxon";
 
 class Member {
+    private RENEWAL_COST = 10;
     private id: string
     protected name: string
     protected createAt: luxon.DateTime
     protected expiredAt: luxon.DateTime
     protected isEnabled: boolean
     protected deposit: number
-    protected paid: number;
+    protected paid: number = 0;
     constructor(id: string, name: string, deposit: number, paid: number) {
-        this.paid = paid;
-        if (deposit >= this.paid) {
-            this.deposit = deposit;
-        } else {
-            throw new Error("Your deposit is not enough.")
-        }
+        this.deposit = deposit;
+
+        this.balance(paid);
         this.id = id;
         this.name = name;
         this.createAt = luxon.DateTime.now()
         this.expiredAt = this.createAt.plus({ years: 1 })
         this.isEnabled = true;
-
     }
 
     public setExpiredAt(date: luxon.DateTime) {
@@ -38,6 +35,9 @@ class Member {
         return this.createAt;
     }
 
+    public getIsEnabled(): boolean {
+        return this.isEnabled;
+    }
     public setEnable(enable: boolean) {
         this.isEnabled = enable
         return this.isEnabled;
@@ -57,6 +57,20 @@ class Member {
 
     public setPaid(paid: number) {
         this.paid = paid;
+    }
+
+    public balance(amount: number) {
+        if (this.deposit >= amount) {
+            this.deposit -= amount;
+            this.paid += amount;
+        } else {
+            throw new Error("Not enough balance.")
+        }
+    }
+
+    public renew() {
+        this.balance(this.RENEWAL_COST);
+        this.expiredAt = this.expiredAt.plus({ year: 1 });
     }
 
 }

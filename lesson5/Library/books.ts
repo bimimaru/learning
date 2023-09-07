@@ -3,7 +3,7 @@
 // Novel: id, title, publisher, rentingCost, quantity, author, category
 import * as luxon from "luxon";
 
-class Books {
+class Book {
     protected id: string;
     protected title: string;
     protected publisher: string;
@@ -31,7 +31,7 @@ class Books {
     }
 }
 
-class Textbook extends Books {
+class Textbook extends Book {
     protected numberOfPages: number;
     constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, numberOfPages: number) {
         super(id, title, publisher, rentingCost, quantity)
@@ -39,7 +39,7 @@ class Textbook extends Books {
     }
 }
 
-class ReferenceBook extends Books {
+class ReferenceBook extends Book {
     protected domain: string;
     protected level: number;
     constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, domain: string, level: number) {
@@ -49,7 +49,7 @@ class ReferenceBook extends Books {
     }
 }
 
-class Novel extends Books {
+class Novel extends Book {
     protected author: string;
     protected category: string;
 
@@ -60,4 +60,4 @@ class Novel extends Books {
     }
 }
 
-export { Books, Novel, ReferenceBook, Textbook }
+export { Book, Novel, ReferenceBook, Textbook }

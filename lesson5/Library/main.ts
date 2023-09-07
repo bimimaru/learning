@@ -1,4 +1,4 @@
-import { Books } from "./books";
+import { Book } from "./books";
 import { Library } from "./library";
 import { ReferenceBook } from "./books";
 import { Novel } from "./books";
