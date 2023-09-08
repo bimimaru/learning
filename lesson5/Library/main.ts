@@ -45,8 +45,8 @@ library.rentBook(bimRent)
 library.rentBook(bimRent1)
 library.rentBook(bimRent2)
 
-console.log(library.getBestRenter(2))
-console.log(library.getBookByTypeAndThresholds(35, 70))
+console.log(library.getBestRenter(1))
+// console.log(library.getBookByTypeAndThresholds(35, 70))
 
 try {
     library.memberPrint(to)

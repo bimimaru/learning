@@ -39,15 +39,14 @@ class Library {
 
   getMostUsedService() {//20
     let result: any = {}
-    let max = 0
-    let name = ""
+
+    let maxIdx = 0;
     for (let i = 0; i < this.services.length; i++) {
-      if (this.services[i].getNumberOfUsed() > max) {
-        max = this.services[i].getNumberOfUsed()
-        name = this.services[i].getName()
+      if (this.services[i].getNumberOfUsed() > this.services[maxIdx].getNumberOfUsed()) {
+        maxIdx = i;
       }
     }
-    result[name] = max;
+    result[this.services[maxIdx].getName()] = this.services[maxIdx].getNumberOfUsed();
     return result;
   }
 
@@ -78,7 +77,7 @@ class Library {
     }
   }
 
-  getBookByTypeAndThresholds(threshold1: number, threshold2: number) { //15
+  getBooksByTypeAndThresholds(threshold1: number, threshold2: number, type: string) { //15
     let result: any = {
       "Textbook": [],
       "Novel": [],
@@ -92,7 +91,7 @@ class Library {
         else if (this.books[i] instanceof Novel) {
           result["Novel"].push(this.books[i])
         }
-        if (this.books[i] instanceof ReferenceBook) {
+        else if (this.books[i] instanceof ReferenceBook) {
           result["ReferenceBook"].push(this.books[i])
         }
       }
@@ -102,9 +101,13 @@ class Library {
 
   getTopNFromBooks(countRentedBooks: any, n: number) {
     let result: any = {}
-    let maxQuantityIndex = 0
+    let maxQuantityIndex = 0;
+
     for (let i = 0; i < n; i++) {
       let product = Object.keys(countRentedBooks)
+      if (product.length == 0) {
+        return result;
+      }
       for (let j = 0; j < product.length; j++) {
         if (countRentedBooks[product[j]] > countRentedBooks[product[maxQuantityIndex]]) {
           maxQuantityIndex = j
@@ -118,47 +121,54 @@ class Library {
   }
 
   getCountBookOfReferenceType() {
-    let countRentedBooks: any = {}
-    const event = this.getEvent()
+    let countRentedBooks: any = {};
+    const event = this.getEvent();
+
     for (let i = 0; i < event.length; i++) {
-      let count = 0
-      for (let j = 0; j < event.length; j++) {
-        if (event[i].book == event[j].book && event[i].book instanceof ReferenceBook) {
-          count += event[i].quantity;
+      if (event[i].book instanceof ReferenceBook) {
+        const bookTitle = event[i].book.getTitle();
+        if (countRentedBooks[bookTitle]) {
+          countRentedBooks[bookTitle] += event[i].quantity;
+        } else {
+          countRentedBooks[bookTitle] = event[i].quantity;
         }
       }
-      countRentedBooks[event[i].book.getTitle()] = count;
     }
 
     return countRentedBooks;
   }
+
   getCountBookOfNovelType() {
     let countRentedBooks: any = {}
     const event = this.getEvent()
+
     for (let i = 0; i < event.length; i++) {
-      let count = 0
-      for (let j = 0; j < event.length; j++) {
-        if (event[i].book == event[j].book && event[i].book instanceof Novel) {
-          count += event[i].quantity;
+      if (event[i].book instanceof Novel) {
+        const bookTitle = event[i].book.getTitle();
+        if (countRentedBooks[bookTitle]) {
+          countRentedBooks[bookTitle] += event[i].quantity;
+        } else {
+          countRentedBooks[bookTitle] = event[i].quantity;
         }
       }
-      countRentedBooks[event[i].book.getTitle()] = count;
     }
 
     return countRentedBooks;
   }
 
   getCountBookOfTextbookType() {
-    let countRentedBooks: any = {}
-    const event = this.getEvent()
+    let countRentedBooks: any = {};
+    const event = this.getEvent();
+
     for (let i = 0; i < event.length; i++) {
-      let count = 0
-      for (let j = 0; j < event.length; j++) {
-        if (event[i].book == event[j].book && event[i].book instanceof Textbook) {
-          count += event[i].quantity;
+      if (event[i].book instanceof Textbook) {
+        const bookTitle = event[i].book.getTitle();
+        if (countRentedBooks[bookTitle]) {
+          countRentedBooks[bookTitle] += event[i].quantity;
+        } else {
+          countRentedBooks[bookTitle] = event[i].quantity;
         }
       }
-      countRentedBooks[event[i].book.getTitle()] = count;
     }
 
     return countRentedBooks;

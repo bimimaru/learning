@@ -25,6 +25,10 @@ class RentingEvent {
             this.expiredDate = this.rentedDate.plus({ day: 30 })
         }
     }
+
+    public returnBook() {
+        this.returnDate = luxon.DateTime.now();
+    }
 }
 
 export { RentingEvent }
