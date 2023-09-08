@@ -3,6 +3,7 @@ import { Guest, Member, PermanentMember } from "./member";
 import * as luxon from "luxon";
 import { RentingEvent } from "./renting-event";
 import { CoSpaceService, PrintingService, RentingHeadphoneService, Service } from "./service";
+import { CharityEvent } from "./charity";
 
 class Library {
   private name: string
@@ -12,6 +13,8 @@ class Library {
   private events: RentingEvent[]
   private revenue: number
   private services: Service[]
+  private blackList: Member[]
+  private charityList: CharityEvent[]
 
   constructor(name: string, address: string, services: Service[]) {
     this.name = name;
@@ -20,11 +23,23 @@ class Library {
     this.members = []
     this.events = []
     this.revenue = 0;
+    this.blackList = []
     this.services = services;
+    this.charityList = []
     setInterval((): void => {
       this.checkMembershipExpiry()
     }, 2000);
+    setInterval((): void => {
+      this.fineOverduedMember()
+    }, 3000);
+    setInterval((): void => {
+      this.removeCharityAfterAYear()
+    }, 3000);
   }
+  getBooks() {
+    return this.books;
+  }
+
   getEvent() {
     return this.events;
   }
@@ -32,9 +47,26 @@ class Library {
   getRevenue() { //19
     return this.revenue;
   }
+  removeCharityAfterAYear() {//29
+    for (let i = 0; i < this.charityList.length; i++) {
+      let diff = luxon.Interval.fromDateTimes(this.charityList[i].getDonatedDate(), luxon.DateTime.now())
+      let diffYear = diff.length("years")
+      if (diffYear > 1) {
+        this.charityList.splice(i, 1)
+      }
+    }
+  }
+  addCharity(charity: CharityEvent) {
+    this.charityList.push(charity);
+  }
 
-  returnBooks(event: Event) {
+  returnBooks(event: RentingEvent) {//21
+    let foundIndex = this.events.findIndex((element) => element == event)
+    this.events[foundIndex].returnBook();
+    this.events[foundIndex].setStatus("Returned");
 
+    let foundBookIndex = this.books.findIndex((element) => element == event.book)
+    this.books[foundBookIndex].setQuantity(this.books[foundBookIndex].getQuantity() + event.quantity)
   }
 
   getMostUsedService() {//20
@@ -51,33 +83,43 @@ class Library {
   }
 
   memberCoSpace(member: Member) {
-    for (let i = 0; i < this.services.length; i++) {
-      if (this.services[i] instanceof CoSpaceService) {
-        this.services[i].consume(member);
-        this.revenue += this.services[i].getCost()
+    if (this.blackList.find((element) => element == member)) {
+      throw new Error(member.getName() + " is currently blocked from all service.")
+    } else {
+      for (let i = 0; i < this.services.length; i++) {
+        if (this.services[i] instanceof CoSpaceService) {
+          this.services[i].consume(member);
+          this.revenue += this.services[i].getCost()
+        }
       }
     }
   }
-
   memberHeadPhone(member: Member) {
-    for (let i = 0; i < this.services.length; i++) {
-      if (this.services[i] instanceof RentingHeadphoneService) {
-        this.services[i].consume(member);
-        this.revenue += this.services[i].getCost()
+    if (this.blackList.find((element) => element == member)) {
+      throw new Error(member.getName() + " is currently blocked from all service.")
+    } else {
+      for (let i = 0; i < this.services.length; i++) {
+        if (this.services[i] instanceof RentingHeadphoneService) {
+          this.services[i].consume(member);
+          this.revenue += this.services[i].getCost()
+        }
       }
     }
-
   }
   memberPrint(member: Member) {
-    for (let i = 0; i < this.services.length; i++) {
-      if (this.services[i] instanceof PrintingService) {
-        this.services[i].consume(member);
-        this.revenue += this.services[i].getCost()
+    if (this.blackList.find((element) => element == member)) {
+      throw new Error(member.getName() + " is currently blocked from all service.")
+    } else {
+      for (let i = 0; i < this.services.length; i++) {
+        if (this.services[i] instanceof PrintingService) {
+          this.services[i].consume(member);
+          this.revenue += this.services[i].getCost()
+        }
       }
     }
   }
 
-  getBooksByTypeAndThresholds(threshold1: number, threshold2: number, type: string) { //15
+  getBooksByTypeAndThresholds(threshold1: number, threshold2: number/*type: string*/) { //15
     let result: any = {
       "Textbook": [],
       "Novel": [],
@@ -116,7 +158,6 @@ class Library {
       result[product[maxQuantityIndex]] = countRentedBooks[product[maxQuantityIndex]]
       delete countRentedBooks[product[maxQuantityIndex]]
     }
-
     return result;
   }
 
@@ -134,7 +175,6 @@ class Library {
         }
       }
     }
-
     return countRentedBooks;
   }
 
@@ -152,7 +192,6 @@ class Library {
         }
       }
     }
-
     return countRentedBooks;
   }
 
@@ -170,7 +209,6 @@ class Library {
         }
       }
     }
-
     return countRentedBooks;
   }
 
@@ -182,56 +220,113 @@ class Library {
     }
   }
 
-  rentBook(event: RentingEvent) {//8+9 +13
+  discountRentingCost(event: RentingEvent) {
     const notEnoughBalanceMessage = "You do not have enough deposite to rent this book.";
-    const unavailableBook = "There is no available book for rent.";
-
     const rentingCost = event.book.getRentingCost() * event.quantity;
 
-    let foundBookIndex = this.books.findIndex((element) => element == event.book);
-    if (foundBookIndex == -1 || this.books[foundBookIndex].getQuantity() < event.quantity) {
-      throw new Error(unavailableBook)
-    } else {
-      const foundBook = this.books[foundBookIndex]
+    let rate = 0
+    let discountCost = rentingCost - rentingCost * rate
 
-      if (event.member instanceof PermanentMember) { //11
-        if (event.member.isVIP) {//13
-          let discountCost = rentingCost - rentingCost * 0.15
-
-          try {
-            event.member.balance(discountCost);
-          } catch (e) {
-            console.log(notEnoughBalanceMessage);
-          }
-
-          this.events.push(event)
-          this.revenue += discountCost
-        } else {
-          let discountCost = rentingCost - rentingCost * 0.1
-
-          try {
-            event.member.balance(discountCost);
-          } catch (e) {
-            console.log(notEnoughBalanceMessage);
-          }
-
-          this.events.push(event)
-          this.revenue += discountCost
-        }
+    if (event.member instanceof PermanentMember) { //11
+      if (event.member.isVIP) {//13
+        rate = 0.15
       } else {
-        try {
-          event.member.balance(rentingCost);
-        } catch (e) {
-          console.log(notEnoughBalanceMessage);
-        }
-
-        this.events.push(event)
-        this.revenue += rentingCost
+        rate = 0.1
       }
-
-      foundBook.setQuantity(foundBook.getQuantity() - event.quantity)
     }
-    this.promoteEligibleMember()
+    try {
+      event.member.balance(discountCost);
+    } catch (e) {
+      console.log(notEnoughBalanceMessage);
+    }
+    this.events.push(event)
+    this.revenue += discountCost
+  }
+
+  transferMember(event: RentingEvent, member: Member) { //27
+    let foundEvent = this.events.find((element) => element == event)
+    foundEvent!.setStatus("Transferred")
+    let newEvent = new RentingEvent(member, event.book, event.quantity)
+    this.events.push(newEvent)
+    newEvent.setExpiredDate(event.getExpiredDate()!)
+  }
+
+  fineOverduedMember() { //24
+    for (let i = 0; i < this.events.length; i++) {
+      if (this.events[i].getStatus() == "In Use") {
+        let expiredDate = this.events[i].getExpiredDate()
+        let member = this.events[i].member
+        if (expiredDate) {
+
+          let diff = luxon.Interval.fromDateTimes(expiredDate!, luxon.DateTime.now())
+          let diffDay = diff.length("days")
+
+          if (diffDay > 0) {
+            if (member.getDeposit() >= 5) {
+              member.setDeposit(-5)
+            } else {
+              member.setEnable(false);
+            }
+          }
+
+          if (diffDay > 30 && this.events[i].returnBook() == undefined) {
+            member.setEnable(false)
+            this.events[i].setStatus("Lost")
+            this.blackList.push(member)
+          }
+        }
+      }
+    }
+  }
+
+  checkRentingBookQuantity(event: RentingEvent) { //23
+    let maxRentingQuantity = 2
+    if (event.member instanceof PermanentMember) {
+      if (event.member.isVIP) {
+        maxRentingQuantity = 5
+      } else {
+        maxRentingQuantity = 3
+      }
+    }
+    if (event.quantity > maxRentingQuantity) {
+      throw new Error(event.member.getName() + " have exceeded the limit of renting books.")
+    }
+  }
+
+  reEnableMember(member: Member) {//25
+    let checkBlackList = this.blackList.find((element) => element == member)
+    if (!checkBlackList && !member.getIsEnabled() && member.getDeposit() >= 20) {
+      member.setDeposit(-20);
+      member.setEnable(true);
+    }
+  }
+
+  rentBook(event: RentingEvent) {//8+9 +13
+    const unavailableBook = "There is no available book for rent.";
+    let checkBlackList = this.blackList.find((element) => element == event.member)
+
+    if (checkBlackList) {
+      throw new Error(event.member.getName() + " is currently blocked from all service.")
+    } else {
+
+      let foundBookIndex = this.books.findIndex((element) => element == event.book);
+      if (foundBookIndex == -1 || this.books[foundBookIndex].getQuantity() < event.quantity) {
+        throw new Error(unavailableBook)
+      } else {
+
+        try {
+          this.checkRentingBookQuantity(event)
+        } catch (e) {
+          console.log(e)
+          return;
+        }
+        const foundBook = this.books[foundBookIndex]
+
+        this.discountRentingCost(event)
+        foundBook.setQuantity(foundBook.getQuantity() - event.quantity)
+      }
+      this.promoteEligibleMember(event.member)
+    }
   }
 
   // Rollback Transaction
@@ -240,11 +335,9 @@ class Library {
     member.setPaid(member.getPaid() + amount);
   }
 
-  promoteEligibleMember() {//13
-    for (let i = 0; i < this.members.length; i++) {
-      if (this.members[i] instanceof PermanentMember && this.members[i].getPaid() >= 300) {
-        (this.members[i] as PermanentMember).setVIP(true)
-      }
+  promoteEligibleMember(member: Member) {//13
+    if (member instanceof PermanentMember && member.getPaid() >= 300) {
+      (member as PermanentMember).setVIP(true)
     }
   }
 

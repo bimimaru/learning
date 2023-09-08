@@ -18,8 +18,8 @@ const to = new Guest("0812", "To", 200)
 const bim = new PermanentMember("0702", "Bim", 500)
 
 const toRent = new RentingEvent(to, sherlock, 2)
-const bimRent = new RentingEvent(bim, coding, 3)
-const bimRent1 = new RentingEvent(bim, sherlock, 4)
+const bimRent = new RentingEvent(bim, coding, 1)
+const bimRent1 = new RentingEvent(bim, sherlock, 6)
 const bimRent2 = new RentingEvent(bim, twilight, 2)
 
 const print = new PrintingService("Printing Service", 5)
@@ -45,7 +45,14 @@ library.rentBook(bimRent)
 library.rentBook(bimRent1)
 library.rentBook(bimRent2)
 
-console.log(library.getBestRenter(1))
+
+library.returnBooks(toRent)
+library.returnBooks(bimRent)
+console.log(library.getEvent())
+library.transferMember(bimRent2, to)
+console.log(library.getEvent())
+
+//console.log(library.getBestRenter(1))
 // console.log(library.getBookByTypeAndThresholds(35, 70))
 
 try {
@@ -58,13 +65,13 @@ try {
 } catch (e) {
     console.log(e)
 }
-try {
-    library.memberCoSpace(to)
-} catch (e) {
-    console.log(e)
-}
-library.memberHeadPhone(bim)
+// try {
+//     library.memberCoSpace(bim)
+// } catch (e) {
+//     console.log(e)
+//}
 
 
 console.log(library.getRevenue())
 console.log(library.getMostUsedService())
+

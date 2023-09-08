@@ -21,6 +21,9 @@ class Member {
         this.expiredAt = this.createAt.plus({ years: 1 })
         this.isEnabled = true;
     }
+    public getName() {
+        return this.name;
+    }
 
     public setExpiredAt(date: luxon.DateTime) {
         this.expiredAt = date;
@@ -72,7 +75,6 @@ class Member {
         this.balance(this.RENEWAL_COST);
         this.expiredAt = this.expiredAt.plus({ year: 1 });
     }
-
 }
 
 class Guest extends Member {

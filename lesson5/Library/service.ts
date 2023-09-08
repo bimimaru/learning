@@ -27,7 +27,11 @@ class Service {
     }
     public consume(member: Member): void {
         this.numberOfUsed++;
-        member.balance(this.costPerUse);
+        try {
+            member.balance(this.costPerUse);
+        } catch (e) {
+            console.log(e)
+        }
     }
 }
 
