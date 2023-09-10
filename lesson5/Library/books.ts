@@ -9,12 +9,17 @@ class Book {
     protected publisher: string;
     protected rentingCost: number;
     protected quantity: number;
-    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number) {
+    protected price: number;
+    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, price: number) {
         this.id = id;
         this.title = title;
         this.publisher = publisher;
         this.rentingCost = rentingCost;
         this.quantity = quantity;
+        this.price = price;
+    }
+    public getPrice() {
+        return this.price;
     }
     public setQuantity(newQuantity: number): number {
         this.quantity = newQuantity;
@@ -33,8 +38,8 @@ class Book {
 
 class Textbook extends Book {
     protected numberOfPages: number;
-    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, numberOfPages: number) {
-        super(id, title, publisher, rentingCost, quantity)
+    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, numberOfPages: number, price: number) {
+        super(id, title, publisher, rentingCost, quantity, price)
         this.numberOfPages = numberOfPages;
     }
 }
@@ -42,8 +47,8 @@ class Textbook extends Book {
 class ReferenceBook extends Book {
     protected domain: string;
     protected level: number;
-    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, domain: string, level: number) {
-        super(id, title, publisher, rentingCost, quantity);
+    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, domain: string, level: number, price: number) {
+        super(id, title, publisher, rentingCost, quantity, price);
         this.domain = domain;
         this.level = level;
     }
@@ -53,8 +58,8 @@ class Novel extends Book {
     protected author: string;
     protected category: string;
 
-    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, author: string, category: string) {
-        super(id, title, publisher, rentingCost, quantity);
+    constructor(id: string, title: string, publisher: string, rentingCost: number, quantity: number, author: string, category: string, price: number) {
+        super(id, title, publisher, rentingCost, quantity, price);
         this.author = author;
         this.category = category;
     }

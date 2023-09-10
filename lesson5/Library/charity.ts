@@ -5,21 +5,26 @@ import * as luxon from "luxon";
 
 class CharityEvent {//28
     private member: Member
-    private donatedBooks: Book[]
+    private donatedBook: Book
     private donatedDate: luxon.DateTime
-    constructor(member: Member, books: Book[]) {
+    private quantity: number
+    constructor(member: Member, books: Book, quantity: number) {
         this.member = member;
-        this.donatedBooks = books;
+        this.donatedBook = books;
         this.donatedDate = luxon.DateTime.now()
+        this.quantity = quantity
+    }
+    getQuantity() {
+        return this.quantity;
     }
     getDonatedDate() {
         return this.donatedDate;
     }
-    getMember() {
+    getMember(): Member {
         return this.member;
     }
-    getBooks() {
-        return this.donatedBooks;
+    getBook() {
+        return this.donatedBook;
     }
 }
 

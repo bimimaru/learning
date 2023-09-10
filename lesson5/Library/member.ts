@@ -21,6 +21,9 @@ class Member {
         this.expiredAt = this.createAt.plus({ years: 1 })
         this.isEnabled = true;
     }
+    public getID() {
+        return this.id;
+    }
     public getName() {
         return this.name;
     }

@@ -34,8 +34,12 @@ class Library {
     }, 3000);
     setInterval((): void => {
       this.removeCharityAfterAYear()
-    }, 3000);
+    }, 10000);
   }
+  getMember() {
+    return this.members;
+  }
+
   getBooks() {
     return this.books;
   }
@@ -47,6 +51,67 @@ class Library {
   getRevenue() { //19
     return this.revenue;
   }
+
+  findTop3Donate() {//30
+    //sort out donater name with their values
+    let sortedDonator: { [keys: string]: number } = {}
+    for (let j = 0; j < this.charityList.length; j++) {
+      //let maxValue = this.charityList[maxValueIndex].getQuantity() * this.charityList[maxValueIndex].getBook().getPrice();
+      let value = this.charityList[j].getQuantity() * this.charityList[j].getBook().getPrice();
+      let memberName = this.charityList[j].getMember().getName();
+      if (sortedDonator[memberName]) {
+        sortedDonator[memberName] += value
+      } else {
+        sortedDonator[memberName] = value
+      }
+    }
+    console.log(sortedDonator)
+
+    // find top 3 donator
+    let foundTop3: any = {}
+    for (let i = 0; i < 3; i++) {
+      let keyResult = Object.keys(sortedDonator)
+      let maxValueIndex = 0;
+
+      for (let j = 0; j < keyResult.length; j++)
+        if (sortedDonator[keyResult[j]] > sortedDonator[keyResult[maxValueIndex]]) {
+          maxValueIndex = j
+        }
+      foundTop3[keyResult[maxValueIndex]] = sortedDonator[keyResult[maxValueIndex]]
+      delete sortedDonator[keyResult[maxValueIndex]]
+    }
+    console.log(foundTop3)
+
+    // promote top 3
+    let key = Object.keys(foundTop3)
+    console.log(key[0])
+    for (let i = 0; i < key.length; i++) {
+      for (let j = 0; j < this.members.length; j++) {
+        let member = this.members[j]
+
+        if (member.getName() == key[i]) {
+          if (member instanceof Guest) {
+            let promote = new PermanentMember(member.getID(), member.getName(), member.getDeposit());
+            this.addMember(promote);
+            (member as Guest).setEnable(false)
+            promote.getExpiredAt().plus({ year: 1 })
+            break;
+          }
+          else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == false) {
+            (member as PermanentMember).setVIP(true)
+            member.getExpiredAt().plus({ year: 1 })
+            break;
+          }
+          else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == true) {
+            (member as PermanentMember).setDeposit(100)
+            break;
+          }
+        }
+      }
+    }
+    return foundTop3;
+  }
+
   removeCharityAfterAYear() {//29
     for (let i = 0; i < this.charityList.length; i++) {
       let diff = luxon.Interval.fromDateTimes(this.charityList[i].getDonatedDate(), luxon.DateTime.now())
@@ -56,8 +121,14 @@ class Library {
       }
     }
   }
-  addCharity(charity: CharityEvent) {
+  addCharity(charity: CharityEvent) { //28
     this.charityList.push(charity);
+    let foundBookIndex = this.books.findIndex((element) => element == charity.getBook())
+    if (foundBookIndex >= 0) {
+      this.books[foundBookIndex].setQuantity(charity.getBook().getQuantity())
+    } else {
+      this.addBooks(charity.getBook())
+    }
   }
 
   returnBooks(event: RentingEvent) {//21
