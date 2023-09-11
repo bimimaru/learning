@@ -7,7 +7,7 @@ class RentingEvent {
     public book: Book;
     public quantity: number;
     public rentedDate: luxon.DateTime;
-    protected expiredDate: luxon.DateTime | undefined;
+    protected expiredDate: luxon.DateTime;
     protected returnDate: luxon.DateTime | undefined;
     protected status: string
     constructor(member: Member, book: Book, quantity: number) {
@@ -20,10 +20,10 @@ class RentingEvent {
         if (member instanceof Guest) {
             this.expiredDate = this.rentedDate.plus({ day: 10 })
         }
-        if (member instanceof PermanentMember && (member as PermanentMember).isVIP == false) {
+        else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == false) {
             this.expiredDate = this.rentedDate.plus({ day: 20 })
         }
-        if (member instanceof PermanentMember && (member as PermanentMember).isVIP == true) {
+        else {
             this.expiredDate = this.rentedDate.plus({ day: 30 })
         }
     }
@@ -40,7 +40,7 @@ class RentingEvent {
         return this.status;
     }
 
-    public getExpiredDate(): luxon.DateTime | undefined {
+    public getExpiredDate(): luxon.DateTime {
         return this.expiredDate;
     }
 

@@ -26,6 +26,10 @@ class CharityEvent {//28
     getBook() {
         return this.donatedBook;
     }
+
+    getDonationValue() {
+        return this.quantity * this.getBook().getPrice();
+    }
 }
 
 export { CharityEvent }
