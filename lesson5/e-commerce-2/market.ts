@@ -41,18 +41,30 @@ class Market {
         return result;
     }
 
-    searchProducts(owner: User | undefined, category: string | undefined, threshold1: number | undefined, threshold2: number | undefined): Product[] {//12
+    searchProducts(
+        owner: User | undefined,
+        category: string | undefined,
+        thresholds: {
+            threshold1: number,
+            threshold2: number
+        } | undefined
+    ): Product[] {//12
         let result: Product[] = []
-        if (owner != undefined && category == undefined && threshold1 == undefined && threshold2 == undefined) {
+
+        if (owner != undefined && category == undefined && thresholds == undefined) {
             this.findProductsByOwner(owner);
-        } else if (owner == undefined && category != undefined && threshold1 == undefined && threshold2 == undefined) {
+
+        } else if (owner == undefined && category != undefined && thresholds == undefined) {
             this.findProductsByCategory(category);
-        } else if (owner == undefined && category == undefined && threshold1 != undefined && threshold2 != undefined) {
-            this.findProductsByThresholds(threshold1, threshold2)
-        } else if (owner == undefined && category != undefined && threshold1 != undefined && threshold2 != undefined) {
-            this.findProductsByThresholdsAndCategory(category, threshold1, threshold2)
-        } else if (owner != undefined && category == undefined && threshold1 != undefined && threshold2 != undefined) {
-            this.findProductsByThresholdsAndOwner(owner, threshold1, threshold2)
+
+        } else if (owner == undefined && category == undefined && thresholds != undefined) {
+            this.findProductsByThresholds(thresholds.threshold1, thresholds.threshold2)
+
+        } else if (owner == undefined && category != undefined && thresholds != undefined) {
+            this.findProductsByThresholdsAndCategory(category, thresholds.threshold1, thresholds.threshold2)
+
+        } else if (owner != undefined && category == undefined && thresholds != undefined) {
+            this.findProductsByThresholdsAndOwner(owner, thresholds.threshold1, thresholds.threshold2);
         } else {
             console.log("There is no product suited your search.")
         }
@@ -123,7 +135,10 @@ class Market {
     }
     disableProduct(product: Product) { //8
         let foundProduct = this.sellProducts.find((element) => element == product)
-        foundProduct!.setEnable(false)
+
+        if (foundProduct != undefined) {
+            foundProduct.setEnable(false)
+        }
     }
     addSellProduct(product: Product, user: User) { //6
         product.setUser(user)
