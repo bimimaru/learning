@@ -53,10 +53,14 @@ library.addMember(tam)
 // console.log(library.getNumberOfDistinctBooks())
 // console.log(library.getNumberOfBooksByType())
 
-library.rentBook(toRent)
-library.rentBook(bimRent)
-library.rentBook(bimRent1)
-library.rentBook(bimRent2)
+try {
+    library.rentBook(toRent)
+    library.rentBook(bimRent)
+    library.rentBook(bimRent1)
+    library.rentBook(bimRent2)
+} catch (e) {
+    console.log((e as Error).message);
+}
 
 
 library.returnBooks(toRent)
@@ -93,6 +97,6 @@ library.addCharity(bimDonate1)
 library.addCharity(nuDonate)
 library.addCharity(tamDonate)
 
-library.findTop3Donate()
+library.findTop3Donate();
 console.log(bim.isVIP, tam instanceof PermanentMember)
 console.log(library.getMember())

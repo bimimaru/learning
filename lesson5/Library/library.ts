@@ -57,12 +57,12 @@ class Library {
     let sortedDonator: { [keys: string]: number } = {}
     for (let j = 0; j < this.charityList.length; j++) {
       //let maxValue = this.charityList[maxValueIndex].getQuantity() * this.charityList[maxValueIndex].getBook().getPrice();
-      let value = this.charityList[j].getQuantity() * this.charityList[j].getBook().getPrice();
-      let memberName = this.charityList[j].getMember().getName();
-      if (sortedDonator[memberName]) {
-        sortedDonator[memberName] += value
+      let value = this.charityList[j].getDonationValue();
+      let memberId = this.charityList[j].getMember().getID();
+      if (sortedDonator[memberId]) {
+        sortedDonator[memberId] += value
       } else {
-        sortedDonator[memberName] = value
+        sortedDonator[memberId] = value
       }
     }
     console.log(sortedDonator)
@@ -84,28 +84,25 @@ class Library {
 
     // promote top 3
     let key = Object.keys(foundTop3)
-    console.log(key[0])
     for (let i = 0; i < key.length; i++) {
-      for (let j = 0; j < this.members.length; j++) {
-        let member = this.members[j]
+      const memberIdx = this.members.findIndex((element => element.getID() == key[i]));
 
-        if (member.getName() == key[i]) {
-          if (member instanceof Guest) {
-            let promote = new PermanentMember(member.getID(), member.getName(), member.getDeposit());
-            this.addMember(promote);
-            (member as Guest).setEnable(false)
-            promote.getExpiredAt().plus({ year: 1 })
-            break;
-          }
-          else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == false) {
-            (member as PermanentMember).setVIP(true)
-            member.getExpiredAt().plus({ year: 1 })
-            break;
-          }
-          else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == true) {
-            (member as PermanentMember).setDeposit(100)
-            break;
-          }
+      if (memberIdx >= 0) {
+        const member = this.members[memberIdx];
+
+        if (member instanceof Guest) {
+          let promote = new PermanentMember(member.getID(), member.getName(), member.getDeposit());
+          this.addMember(promote);
+
+          (member as Guest).setEnable(false);
+          this.members.splice(memberIdx, 1);
+        }
+        else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == false) {
+          (member as PermanentMember).setVIP(true);
+          member.getExpiredAt().plus({ year: 1 })
+        }
+        else if (member instanceof PermanentMember && (member as PermanentMember).isVIP == true) {
+          (member as PermanentMember).setDeposit(100)
         }
       }
     }
@@ -308,42 +305,45 @@ class Library {
     try {
       event.member.balance(discountCost);
     } catch (e) {
-      console.log(notEnoughBalanceMessage);
+      throw new Error(notEnoughBalanceMessage);
     }
-    this.events.push(event)
-    this.revenue += discountCost
+    return discountCost;
   }
 
   transferMember(event: RentingEvent, member: Member) { //27
     let foundEvent = this.events.find((element) => element == event)
-    foundEvent!.setStatus("Transferred")
-    let newEvent = new RentingEvent(member, event.book, event.quantity)
-    this.events.push(newEvent)
-    newEvent.setExpiredDate(event.getExpiredDate()!)
+
+    if (foundEvent) {
+      foundEvent.setStatus("Transferred")
+      let newEvent = new RentingEvent(member, event.book, event.quantity);
+      this.events.push(newEvent)
+      newEvent.setExpiredDate(event.getExpiredDate())
+    }
   }
 
   fineOverduedMember() { //24
     for (let i = 0; i < this.events.length; i++) {
       if (this.events[i].getStatus() == "In Use") {
-        let expiredDate = this.events[i].getExpiredDate()
-        let member = this.events[i].member
-        if (expiredDate) {
+        let expiredDate = this.events[i].getExpiredDate();
+        let member = this.events[i].member;
 
-          let diff = luxon.Interval.fromDateTimes(expiredDate!, luxon.DateTime.now())
-          let diffDay = diff.length("days")
+        let diff = luxon.Interval.fromDateTimes(expiredDate, luxon.DateTime.now());
+        let diffDay = diff.length("days");
 
-          if (diffDay > 0) {
-            if (member.getDeposit() >= 5) {
-              member.setDeposit(-5)
-            } else {
-              member.setEnable(false);
-            }
-          }
+        if (diffDay > 30 && this.events[i].returnBook() == undefined) {
+          member.setEnable(false)
+          this.events[i].setStatus("Lost");
 
-          if (diffDay > 30 && this.events[i].returnBook() == undefined) {
-            member.setEnable(false)
-            this.events[i].setStatus("Lost")
+          if (this.blackList.includes(member)) {
             this.blackList.push(member)
+          }
+        }
+
+        if (diffDay > 0) {
+          if (member.getDeposit() >= 5) {
+            member.setDeposit(-5)
+          } else {
+            member.setEnable(false);
           }
         }
       }
@@ -366,38 +366,39 @@ class Library {
 
   reEnableMember(member: Member) {//25
     let checkBlackList = this.blackList.find((element) => element == member)
-    if (!checkBlackList && !member.getIsEnabled() && member.getDeposit() >= 20) {
-      member.setDeposit(-20);
+    if (!checkBlackList && !member.getIsEnabled()) {
+      member.balance(-20);
       member.setEnable(true);
+    }
+  }
+
+  checkMemberRentingEligible(event: RentingEvent) {
+    const checkBlackList = this.blackList.find((element) => element == event.member);
+
+    if (checkBlackList) {
+      throw new Error(event.member.getName() + " is currently blocked from all service.")
     }
   }
 
   rentBook(event: RentingEvent) {//8+9 +13
     const unavailableBook = "There is no available book for rent.";
-    let checkBlackList = this.blackList.find((element) => element == event.member)
 
-    if (checkBlackList) {
-      throw new Error(event.member.getName() + " is currently blocked from all service.")
+    this.checkMemberRentingEligible(event);
+    let foundBookIndex = this.books.findIndex((element) => element == event.book);
+    if (foundBookIndex == -1 || this.books[foundBookIndex].getQuantity() < event.quantity) {
+      throw new Error(unavailableBook)
     } else {
+      this.checkRentingBookQuantity(event);
+      const foundBook = this.books[foundBookIndex]
 
-      let foundBookIndex = this.books.findIndex((element) => element == event.book);
-      if (foundBookIndex == -1 || this.books[foundBookIndex].getQuantity() < event.quantity) {
-        throw new Error(unavailableBook)
-      } else {
+      const discountCost = this.discountRentingCost(event);
 
-        try {
-          this.checkRentingBookQuantity(event)
-        } catch (e) {
-          console.log(e)
-          return;
-        }
-        const foundBook = this.books[foundBookIndex]
+      foundBook.setQuantity(foundBook.getQuantity() - event.quantity)
+      this.revenue += discountCost
 
-        this.discountRentingCost(event)
-        foundBook.setQuantity(foundBook.getQuantity() - event.quantity)
-      }
-      this.promoteEligibleMember(event.member)
+      this.events.push(event)
     }
+    this.promoteEligibleMember(event.member)
   }
 
   // Rollback Transaction
