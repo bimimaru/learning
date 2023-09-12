@@ -4,6 +4,7 @@ import { User } from "./user"
 import { Product } from "./product"
 import { Session } from "./session"
 import { Regions } from "./regions"
+import { Market } from "./market"
 
 class Website {
     private name: string
@@ -13,7 +14,7 @@ class Website {
     private headAddress: string
     private revenue: number
     private users: User[]
-    private regions: Regions[]
+    private markets: Market[]
     private session: Session[]
     constructor(name: string, launchedDate: luxon.DateTime, version: string, slogan: string, headAddress: string) {
         this.name = name;
@@ -23,7 +24,7 @@ class Website {
         this.headAddress = headAddress;
         this.revenue = 0;
         this.users = []
-        this.regions = []
+        this.markets = []
         this.session = []
 
     }
@@ -31,7 +32,7 @@ class Website {
         return this.session;
     }
     getRegions() {
-        return this.regions;
+        return this.markets;
     }
     getUsers() {
         return this.users;
@@ -57,10 +58,23 @@ class Website {
         if (checkSession == undefined) {
             let newSession = new Session(user)
             this.session.push(newSession)
+            return newSession
+        } else {
+            return checkSession;
         }
     }
     joinWebsite(member: User) {
         return this.users.push(member)
+    }
+
+    addProduct(product: Product, session: Session) {
+        const market = this.markets.find((market) => market.getRegion().includes(session.getUser().getRegion()));
+
+        if (market) {
+            market.addSellProduct(product, session.getUser());
+        } else {
+            throw new Error('Our market has not been deployed yet!');
+        }
     }
 }
 

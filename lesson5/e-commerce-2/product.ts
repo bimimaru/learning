@@ -10,10 +10,10 @@ class Product {
     protected price: number
     protected category: string
     protected brand: string
-    private images: any[]
+    private images: string[]
     private isEnabled: boolean
     private user: User
-    constructor(id: string, name: string, quantity: number, price: number, category: string, brand: string) {
+    constructor(id: string, name: string, quantity: number, price: number, category: string, brand: string, images: string[]) {
         this.id = id;
         this.name = name;
         this.quantity = quantity;
@@ -21,7 +21,7 @@ class Product {
         this.category = category;
         this.brand = brand;
         this.isEnabled = true;
-        this.images = []
+        this.images = images;
     }
     setUser(user: User) {
         this.user = user;
