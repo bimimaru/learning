@@ -1,17 +1,22 @@
 // Market will have properties: name, address, revenue, regions (list of string) => (ex: [US,UK,VN]), isEnabled
-
+import * as luxon from "luxon"
 import { Product } from "./product"
 import { Regions } from "./regions"
 import { Session } from "./session"
 import { User } from "./user"
+import { Employee } from "./employee"
+import { Cart } from "./cart"
 
-class Market {
+export class Market {
     private name: string
     private address: string
-    private revenue: number
-    private regions: Regions[]
-    private isEnabled: boolean
+    protected revenue: number
+    protected regions: Regions[]
+    protected isEnabled: boolean
     protected sellProducts: Product[]
+    protected transaction: Cart[]
+    private manager: Employee | undefined
+    private cartList: Cart[]
     constructor(name: string, address: string, regions: Regions[]) {
         this.name = name;
         this.address = address;
@@ -19,138 +24,116 @@ class Market {
         this.regions = regions;
         this.isEnabled = true;
         this.sellProducts = []
+        this.transaction = []
+        this.manager = undefined
+        this.cartList = []
     }
-    setEnable(enable: boolean) {
+    getAddress() {
+        return this.address;
+    }
+    getName() {
+        return this.name;
+    }
+    setRevenue(revenue: number) {
+        this.revenue = revenue;
+        return this.revenue;
+    }
+    getRevenue() {
+        return this.revenue;
+    }
+    getTransaction() {
+        return this.transaction;
+    }
+    getProducts() {
+        return this.sellProducts;
+    }
+    public setEnable(enable: boolean) {
         this.isEnabled = enable;
         return this.isEnabled;
     }
-    getEnable() {
+    public getEnable() {
         return this.isEnabled;
     }
-    getRegion() {
+    public getRegion() {
         return this.regions;
     }
+    public getCartList() {
+        return this.cartList;
+    }
 
-    findUserInMarket(region: Regions): User[] { //13
+    getMarketReport() { //23
+        // {
+        //     launchedDate,
+        //     dateExported,
+        //     totalUsers,
+        //     revenue,
+        //     numberOfTransaction,
+        //     marketQuality (revenue/numberOfUser)	
+        // }
+
+    }
+
+    // addToCarts(cart: Cart) {
+    //     this.cartList.push(cart)
+    // }
+    public shutDown() {
+        this.isEnabled = false;
+        this.transaction = [];
+    }
+    public addSellProduct(product: Product, session: Session) { //6
+        product.setOwner(session.getUser())
+        this.sellProducts.push(product)
+    }
+
+    public assignManager(manager: Employee) { //18
+        this.manager = manager;
+    }
+
+    public findUserInMarket(region: Regions): User[] { //13
         let result: User[] = []
         for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getUser().getRegion() == region) {
-                result.push(this.sellProducts[i].getUser())
+            if (this.sellProducts[i].getOwner()?.getRegion() == region && !result.includes(this.sellProducts[i].getOwner()!)) {
+                result.push(this.sellProducts[i].getOwner()!)
             }
         }
         return result;
     }
 
-    searchProducts(
-        owner: User | undefined,
-        category: string | undefined,
-        thresholds: {
-            threshold1: number,
-            threshold2: number
-        } | undefined
-    ): Product[] {//12
-        let result: Product[] = []
-
-        if (owner != undefined && category == undefined && thresholds == undefined) {
-            this.findProductsByOwner(owner);
-
-        } else if (owner == undefined && category != undefined && thresholds == undefined) {
-            this.findProductsByCategory(category);
-
-        } else if (owner == undefined && category == undefined && thresholds != undefined) {
-            this.findProductsByThresholds(thresholds.threshold1, thresholds.threshold2)
-
-        } else if (owner == undefined && category != undefined && thresholds != undefined) {
-            this.findProductsByThresholdsAndCategory(category, thresholds.threshold1, thresholds.threshold2)
-
-        } else if (owner != undefined && category == undefined && thresholds != undefined) {
-            this.findProductsByThresholdsAndOwner(owner, thresholds.threshold1, thresholds.threshold2);
-        } else {
-            console.log("There is no product suited your search.")
-        }
-        return result;
-    }
-    findProductsByThresholdsAndOwner(owner: User, threshold1: number, threshold2: number) {
-        let result: Product[] = []
-        for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getUser() == owner &&
-                this.sellProducts[i].getPrice() >= threshold1 && this.sellProducts[i].getPrice() <= threshold2) {
-                result.push(this.sellProducts[i])
-            }
-        }
-        return result;
-    }
-    findProductsByThresholdsAndCategory(category: string, threshold1: number, threshold2: number) {
-        let result: Product[] = []
-        for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getCategory() == category &&
-                this.sellProducts[i].getPrice() >= threshold1 && this.sellProducts[i].getPrice() <= threshold2) {
-                result.push(this.sellProducts[i])
-            }
-        }
-        return result;
-    }
-    findProductsByThresholds(threshold1: number, threshold2: number) {
-        let result: Product[] = []
-        for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getPrice() >= threshold1 && this.sellProducts[i].getPrice() <= threshold2) {
-                result.push(this.sellProducts[i])
-            }
-        }
-        return result;
-    }
-    findProductsByCategory(category: string) {
-        let result: Product[] = []
-        for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getCategory() == category) {
-                result.push(this.sellProducts[i])
-            }
-        }
-        return result;
-    }
-    findProductsByOwner(owner: User) {
-        let result: Product[] = []
-        for (let i = 0; i < this.sellProducts.length; i++) {
-            if (this.sellProducts[i].getUser() == owner) {
-                result.push(this.sellProducts[i])
-            }
-        }
-        return result;
-    }
-
-    findProductByName(user: User, productName: string) { //11
-        let userRegion = user.getRegion();
-        let result: Product[] = []
-        for (let i = 0; i < this.regions.length; i++) {
-            if (this.regions[i] == userRegion) {
-                for (let j = 0; j < this.sellProducts.length; j++) {
-                    if (this.sellProducts[j].getName() == productName) {
-                        result.push(this.sellProducts[j])
-                    }
-                }
-            }
-        }
-        console.log(result)
-        return result;
-    }
-    disableProduct(product: Product) { //8
+    public disableProduct(product: Product) { //8
         let foundProduct = this.sellProducts.find((element) => element == product)
 
         if (foundProduct != undefined) {
             foundProduct.setEnable(false)
         }
     }
-    addSellProduct(product: Product, user: User) { //6
-        product.setUser(user)
-        this.sellProducts.push(product)
-    }
-    updateSellProduct(product: Product, user: User, quantity: number) { //7
-        let foundProduct = this.sellProducts.find((element) => element == product)
-        let foundUser = this.sellProducts.find((element) => element.getUser() == user)
-        if (foundProduct != undefined && foundUser != undefined) {
-            foundProduct.setQuantity(quantity)
-        }
-    }
+
 }
 
-export { Market }
+export class SampleMarket extends Market {
+    private lauchedDate: luxon.DateTime
+    private shutDownDate: luxon.DateTime | undefined = undefined
+    constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
+        super(name, address, regions)
+        this.lauchedDate = launchedDate;
+    }
+    getLaunchedDate() {
+        return this.lauchedDate;
+    }
+    override shutDown(): void {
+        super.shutDown()
+        this.shutDownDate = luxon.DateTime.now()
+    }
+}
+export class MainMarket extends Market {
+    private lauchedDate: luxon.DateTime
+    constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
+        super(name, address, regions)
+        this.lauchedDate = launchedDate;
+    }
+    getLaunchedDate() {
+        return this.lauchedDate;
+    }
+    override shutDown(): void {
+        console.log("Unable to shut down!")
+    }
+}

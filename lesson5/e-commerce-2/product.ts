@@ -12,7 +12,7 @@ class Product {
     protected brand: string
     private images: string[]
     private isEnabled: boolean
-    private user: User
+    private owner: User | undefined
     constructor(id: string, name: string, quantity: number, price: number, category: string, brand: string, images: string[]) {
         this.id = id;
         this.name = name;
@@ -23,12 +23,12 @@ class Product {
         this.isEnabled = true;
         this.images = images;
     }
-    setUser(user: User) {
-        this.user = user;
-        return this.user
+    setOwner(owner: User) {
+        this.owner = owner;
+        return this.owner
     }
-    getUser() {
-        return this.user;
+    getOwner() {
+        return this.owner;
     }
     getCategory() {
         return this.category;
