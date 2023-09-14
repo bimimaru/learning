@@ -37,6 +37,17 @@ class User {
         this.point = point;
         return this.point;
     }
+
+    addPoint(point: number) {
+        this.point += point;
+        return this.point;
+    }
+
+    decreasePoint(point: number) {
+        this.point = Math.max(this.point - point, 0)
+
+        return this.point;
+    }
     getPoint() {
         return this.point;
     }

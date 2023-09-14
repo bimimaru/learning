@@ -4,10 +4,12 @@ import { User } from "./user"
 import { Product } from "./product"
 import { Session } from "./session"
 import { Regions } from "./regions"
-import { MainMarket, Market, SampleMarket } from "./market"
-import { CartItem } from "./cartItem"
+import { CartItem } from "./cart-item"
 import { Cart } from "./cart"
 import { Membership } from "./membership"
+import { Market } from "./market/market"
+import { SampleMarket } from "./market/sample-market"
+import { MainMarket } from "./market/main-market"
 
 class Website {
     private name: string
@@ -53,21 +55,21 @@ class Website {
     getMarketReport(market: Market): object { //23
         let numberOfUser: number = 0;
         if (this.markets.includes(market)) {
-            let marketUsers: User[] = []
+            let usersCount = 0;
             for (let i = 0; i < this.users.length; i++) {
-                if (market.getRegion().includes(this.users[i].getRegion())) {
-                    marketUsers.push(this.users[i]);
+                if (market.getRegions().includes(this.users[i].getRegion())) {
+                    usersCount++;
                 }
             }
-            numberOfUser = marketUsers.length;
+            numberOfUser = usersCount;
         }
 
         let report: object = {
-            launchedDate: market.getLaunchedDate().toUTC(),
-            dateExported: luxon.DateTime.now().toUTC(),
+            launchedDate: market.getLaunchedDate().toFormat("HH:mm dd MM yyyy"),
+            dateExported: luxon.DateTime.now().toFormat("HH:mm dd MM yyyy"),
             totalUsers: numberOfUser,
             revenue: market.getRevenue(),
-            numberOfTransaction: market.getTransaction().length,
+            numberOfTransaction: market.getTransactions().length,
             marketQuality: (market.getRevenue() / numberOfUser)
         }
         return report;
@@ -87,15 +89,16 @@ class Website {
 
     checkActivity() { //28
         for (let i = 0; i < this.markets.length; i++) {
-            for (let j = 0; j < this.markets[i].getTransaction().length; j++) {
-                let transaction = this.markets[i].getTransaction()[j]
-                if (transaction.getTransactionDate() != undefined) {
-                    let diff = luxon.Interval.fromDateTimes(transaction.getTransactionDate()!, luxon.DateTime.now())
+            for (let j = 0; j < this.markets[i].getTransactions().length; j++) {
+                let transactions = this.markets[i].getTransactions()[j]
+
+                if (transactions.getTransactionDate()) {
+                    let diff = luxon.Interval.fromDateTimes(transactions.getTransactionDate()!, luxon.DateTime.now())
                     let diffYear = diff.length("years")
                     if (diffYear > 1) {
-                        let point = transaction.getUser().getPoint()
-                        transaction.getUser().setPoint(point - (point * 0.3))
-                        this.checkPromoteUser(transaction.getUser())
+                        let point = transactions.getUser().getPoint()
+                        transactions.getUser().decreasePoint(point * 0.3);
+                        this.checkPromoteUser(transactions.getUser())
                     }
                 }
             }
@@ -104,27 +107,16 @@ class Website {
     }
 
     public proceedPayment(cart: Cart) { //21
-        for (let i = 0; i < this.markets.length; i++) {
-            let foundMarket = this.markets[i].getRegion().includes(cart.getUser().getRegion())
-            if (foundMarket) {
-                let userMembership = cart.getUser().getMembership()
-                //27
-                if (userMembership == "Silver") {
-                    cart.setTotal(cart.getTotal() - (cart.getTotal() * 0.02))
-                } else if (userMembership == "Gold") {
-                    cart.setTotal(cart.getTotal() - (cart.getTotal() * 0.05))
-                } else if (userMembership == "Diamond") {
-                    cart.setTotal(cart.getTotal() - (cart.getTotal() * 0.1))
-                }
-                //console.log("====", cart.getTotal())
-                this.markets[i].setRevenue(cart.getTotal())
-                //console.log(this.markets[i].getRevenue())
-                cart.setTransactionDate(luxon.DateTime.now())
-                this.markets[i].getTransaction().push(cart)
-                this.generateUserPoint(cart)
-                this.checkPromoteUser(cart.getUser())
-            }
-            break;
+        let foundMarket = this.markets.find((market) => market.getRegions().includes(cart.getUser().getRegion()));
+
+        if (foundMarket) {
+            const total = cart.checkout();
+
+            foundMarket.setRevenue(total);
+            foundMarket.getTransactions().push(cart);
+
+            this.calculateUserPoint(cart);
+            this.checkPromoteUser(cart.getUser());
         }
     }
     private checkPromoteUser(user: User) { // 26
@@ -139,14 +131,16 @@ class Website {
         //console.log(user.getMembership())
         return user.getMembership();
     }
-    private generateUserPoint(cart: Cart) {
+    private calculateUserPoint(cart: Cart) {
         let buyer = cart.getUser()
-        buyer.setPoint(buyer.getPoint() + (cart.getTotal() * 0.1))
+        buyer.addPoint(cart.getTotal() * 0.1)
         //console.log(buyer, "=========")
         //console.log(cart.getCartItem())
-        for (let i = 0; i < cart.getCartItem().length; i++) {
-            let seller = cart.getCartItem()[i].getProduct().getOwner()
-            seller.setPoint(seller.getPoint() + (cart.getTotal() * 0.05))
+
+        const cartItems = cart.getCartItems();
+        for (let i = 0; i < cartItems.length; i++) {
+            let seller = cartItems[i].getProduct().getOwner()
+            seller.addPoint(cartItems[i].countTotal() * 0.05)
             //console.log(seller, i)
         }
         //console.log(buyer)
@@ -162,7 +156,7 @@ class Website {
     public getUserCart(user: User): Cart {
         let cart: Cart | undefined = undefined
         for (let i = 0; i < this.markets.length; i++) {
-            let foundMarket = this.markets[i].getRegion().includes(user.getRegion())
+            let foundMarket = this.markets[i].getRegions().includes(user.getRegion())
             if (foundMarket) {
                 let cartList = this.markets[i].getCartList()
                 let foundCartIndex = cartList.findIndex((element) => element.getUser() == user)
@@ -184,12 +178,7 @@ class Website {
     }
 
     public transferMarket(market: SampleMarket) { //17
-        let transferredMarket = new MainMarket(market.getName(), market.getAddress(), market.getRegion(), market.getLaunchedDate())
-        transferredMarket.setRevenue(market.getRevenue())
-
-        for (let i = 0; i < market.getProducts().length; i++) {
-            transferredMarket.getProducts().push(market.getProducts()[i])
-        }
+        market.transfer();
         market.shutDown()
     }
 
@@ -209,7 +198,7 @@ class Website {
     ) {
         let result: Product[] = []
         for (let i = 0; i < this.markets.length; i++) {
-            if (this.markets[i].getRegion().includes(session.getUser().getRegion())) {
+            if (this.markets[i].getRegions().includes(session.getUser().getRegion())) {
                 let products = this.markets[i].getProducts()
                 for (let j = 0; j < products.length; j++) {
                     if (owner != undefined && category == undefined && thresholds == undefined) {
@@ -333,28 +322,30 @@ class Website {
     //     return result;
     // }
 
-    public findTop3Seller() { // 24
+    public findTopNSeller(n: number = 3) { // 24
         let foundAllSeller: { [keys: string]: number } = {}
         for (let i = 0; i < this.markets.length; i++) {
-            let transaction = this.markets[i].getTransaction()
-            for (let j = 0; j < transaction.length; j++) {
-                let cartItem = transaction[j].getCartItem()
-                for (let k = 0; k < cartItem.length; k++) {
-                    let memberID = cartItem[k].getProduct().getOwner()?.getID()
-                    let total = transaction[j].getTotal()
-                    if (memberID != undefined) {
-                        if (foundAllSeller[memberID]) {
-                            foundAllSeller[memberID] += total;
-                        } else {
-                            foundAllSeller[memberID] = total;
-                        }
+            let transactions = this.markets[i].getTransactions()
+
+            for (let j = 0; j < transactions.length; j++) {
+                let cartItems = transactions[j].getCartItems()
+                let total = transactions[j].getTotal();
+
+                for (let k = 0; k < cartItems.length; k++) {
+                    let sellerId = cartItems[k].getProduct().getOwner().getID();
+
+                    if (foundAllSeller[sellerId]) {
+                        foundAllSeller[sellerId] += total;
+                    } else {
+                        foundAllSeller[sellerId] = total;
                     }
                 }
             }
         }
 
         let result: { [keys: string]: number } = {}
-        for (let i = 0; i < 3; i++) {
+
+        for (let i = 0; i < n; i++) {
             let keyResult = Object.keys(foundAllSeller)
             let maxTotalIndex = 0
             for (let j = 0; j < keyResult.length; j++) {
@@ -371,7 +362,7 @@ class Website {
 
     public updateSellProduct(product: Product, session: Session, quantity: number) { //7
         if (session.getUser() == product.getOwner()) {
-            let foundMarket = this.markets.find((market) => market.getRegion().includes(session.getUser().getRegion()))
+            let foundMarket = this.markets.find((market) => market.getRegions().includes(session.getUser().getRegion()))
             let foundProduct = foundMarket?.getProducts().find((element) => element == product)
             let foundUser = foundMarket?.getProducts().find((element) => element.getOwner() == session.getUser())
 
@@ -385,7 +376,7 @@ class Website {
         let userRegion = session.getUser().getRegion();
         let result: Product[] = []
         for (let i = 0; i < this.markets.length; i++) {
-            if (this.markets[i].getRegion().includes(userRegion)) {
+            if (this.markets[i].getRegions().includes(userRegion)) {
                 let product = this.markets[i].getProducts()
                 for (let j = 0; j < product.length; j++) {
                     if (product[j].getName() == productName) {
@@ -428,7 +419,7 @@ class Website {
     public addProduct(product: Product, session: Session) { // 5 +6
         if (session.getUser() == product.getOwner()) {
             for (let i = 0; i < this.markets.length; i++) {
-                let regions = this.markets[i].getRegion()
+                let regions = this.markets[i].getRegions()
                 for (let j = 0; j < regions.length; j++) {
                     if (session.getUser().getRegion() == regions[j]) {
                         this.markets[i].addSellProduct(product)

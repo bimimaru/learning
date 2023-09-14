@@ -1,6 +1,7 @@
 import { Cart } from "./cart";
-import { CartItem } from "./cartItem";
-import { MainMarket, Market, SampleMarket } from "./market";
+import { CartItem } from "./cart-item";
+import { MainMarket } from "./market/main-market";
+import { SampleMarket } from "./market/sample-market";
 import { Product } from "./product";
 import { Regions } from "./regions";
 import { User } from "./user";
@@ -83,7 +84,7 @@ aj.proceedPayment(nuCart)
 // console.log(aj.searchProducts(aj.signInSession(to), undefined, undefined, { threshold1: 30, threshold2: 1600 }))
 
 //console.log(aj.getMarketReport(nightMarket))
-//aj.findTop3Seller()
+aj.findTopNSeller()
 //console.log(to, bim, nu, tam)
 aj.checkActivity()
 

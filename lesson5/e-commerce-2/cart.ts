@@ -2,7 +2,8 @@
 // user, cartItems (cartItems is a list of cartItem), total
 
 
-import { CartItem } from "./cartItem";
+import luxon from "luxon";
+import { CartItem } from "./cart-item";
 import { User } from "./user"
 
 export class Cart {
@@ -30,7 +31,7 @@ export class Cart {
     getTotal() {
         return this.total;
     }
-    getCartItem() {
+    getCartItems() {
         return this.cartItems;
     }
     getUser() {
@@ -47,6 +48,22 @@ export class Cart {
         } else {
             console.log("There is not enough available stock.")
         }
+    }
+
+    public checkout(): number {
+        let userMembership = this.user.getMembership();
+
+        if (userMembership == "Silver") {
+            this.total -= this.total * 0.02
+        } else if (userMembership == "Gold") {
+            this.total -= this.total * 0.05;
+        } else if (userMembership == "Diamond") {
+            this.total -= this.total * 0.1
+        }
+
+        this.transactionDate = luxon.DateTime.now()
+
+        return this.total;
     }
 }
 

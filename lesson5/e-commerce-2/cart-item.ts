@@ -12,7 +12,7 @@ export class CartItem {
         this.product = product;
         this.quantity = quantity;
         this.note = note;
-        this.total = 0;
+        this.total = this.product.getPrice() * this.quantity;
     }
     countTotal(): number {
         this.total = this.product.getPrice() * this.quantity;

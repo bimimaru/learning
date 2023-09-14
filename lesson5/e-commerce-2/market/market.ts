@@ -1,20 +1,19 @@
 // Market will have properties: name, address, revenue, regions (list of string) => (ex: [US,UK,VN]), isEnabled
 import * as luxon from "luxon"
-import { Product } from "./product"
-import { Regions } from "./regions"
-import { Session } from "./session"
-import { User } from "./user"
-import { Employee } from "./employee"
-import { Cart } from "./cart"
+import { Cart } from "../cart"
+import { Product } from "../product"
+import { Regions } from "../regions"
+import { User } from "../user"
+import { Employee } from "./../employee";
 
 export class Market {
-    private name: string
-    private address: string
+    protected name: string
+    protected address: string
     protected revenue: number
     protected regions: Regions[]
     protected isEnabled: boolean
     protected sellProducts: Product[]
-    protected transaction: Cart[]
+    protected transactions: Cart[]
     private manager: Employee | undefined
     private cartList: Cart[]
     protected launchedDate: luxon.DateTime
@@ -25,7 +24,7 @@ export class Market {
         this.regions = regions;
         this.isEnabled = true;
         this.sellProducts = []
-        this.transaction = []
+        this.transactions = []
         this.manager = undefined
         this.cartList = []
         this.launchedDate = launchedDate
@@ -46,8 +45,8 @@ export class Market {
     getRevenue() {
         return this.revenue;
     }
-    getTransaction() {
-        return this.transaction;
+    getTransactions() {
+        return this.transactions;
     }
     getProducts() {
         return this.sellProducts;
@@ -59,19 +58,24 @@ export class Market {
     public getEnable() {
         return this.isEnabled;
     }
-    public getRegion() {
+    public getRegions() {
         return this.regions;
     }
     public getCartList() {
         return this.cartList;
     }
+    public transfer(): Market {
+        // TODO implementation
+        throw new Error("Parent market can not transfer");
+
+    };
 
     // addToCarts(cart: Cart) {
     //     this.cartList.push(cart)
     // }
     public shutDown() {
         this.isEnabled = false;
-        this.transaction = [];
+        this.transactions = [];
     }
     public addSellProduct(product: Product) { //6
         this.sellProducts.push(product);
@@ -99,25 +103,5 @@ export class Market {
         if (foundProduct != undefined) {
             foundProduct.setEnable(false)
         }
-    }
-
-}
-
-export class SampleMarket extends Market {
-    private shutDownDate: luxon.DateTime | undefined = undefined
-    constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
-        super(name, address, regions, launchedDate)
-    }
-    override shutDown(): void {
-        super.shutDown()
-        this.shutDownDate = luxon.DateTime.now()
-    }
-}
-export class MainMarket extends Market {
-    constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
-        super(name, address, regions, launchedDate)
-    }
-    override shutDown(): void {
-        console.log("Unable to shut down!")
     }
 }
