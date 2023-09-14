@@ -1,6 +1,7 @@
 // Describe a Product in the system with properties:
 // id, name, quantity, price, category, brand, images (list of string), isEnabled
 
+import { UserInfo } from "os"
 import { User } from "./user"
 
 class Product {
@@ -12,8 +13,8 @@ class Product {
     protected brand: string
     private images: string[]
     private isEnabled: boolean
-    private owner: User | undefined
-    constructor(id: string, name: string, quantity: number, price: number, category: string, brand: string, images: string[]) {
+    private owner: User
+    constructor(id: string, name: string, quantity: number, price: number, category: string, brand: string, images: string[], owner: User) {
         this.id = id;
         this.name = name;
         this.quantity = quantity;
@@ -22,6 +23,7 @@ class Product {
         this.brand = brand;
         this.isEnabled = true;
         this.images = images;
+        this.owner = owner;
     }
     setOwner(owner: User) {
         this.owner = owner;

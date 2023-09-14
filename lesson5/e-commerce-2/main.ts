@@ -16,15 +16,18 @@ const bim = new User("BIM07", "bimimaru", "", "pass", Regions.UK)
 const nu = new User("NU03", "numiao", "", "pass", Regions.VN)
 const tam = new User("TAM21", "avery", "", "pass", Regions.VN)
 
-const macbook = new Product("MAC01", "Macbook Air 2023", 10, 2000, "Electronic", "Apple", [])
-const iphone = new Product("IP11", "Iphone 15 Pro", 15, 1500, "Electronic", "Apple", [])
-const shirt = new Product("", "Orange T-shirt", 20, 60, "Clothes", "Zara", [])
-const hat = new Product("", "Cap Hat", 30, 30, "Clothes", "LA", [])
-const comChay = new Product("", "Com Chay Ngon", 100, 15, "Food", "Homebrand", [])
+const macbook = new Product("MAC01", "Macbook Air 2023", 10, 2000, "Electronic", "Apple", [], to)
+const iphone = new Product("IP11", "Iphone 15 Pro", 15, 1500, "Electronic", "Apple", [], to)
+const shirt = new Product("", "Orange T-shirt", 20, 60, "Clothes", "Zara", [], nu)
+const hat = new Product("", "Cap Hat", 30, 30, "Clothes", "LA", [], nu)
+const comChay = new Product("", "Com Chay Ngon", 100, 15, "Food", "Homebrand", [], bim)
 
 const tamComChay = new CartItem(comChay, 2, "")
-const bimMacbook = new CartItem(macbook, 1, "")
+const bimMacbook = new CartItem(macbook, 10, "")
 const tamIphone = new CartItem(iphone, 3, "")
+const nuIphone = new CartItem(iphone, 2, "")
+const toShirt = new CartItem(shirt, 7, "")
+const bimHat = new CartItem(hat, 10, "")
 
 aj.addMarket(nightMarket)
 aj.addMarket(dayMarket)
@@ -32,6 +35,7 @@ aj.addMarket(dayMarket)
 aj.joinWebsite(to)
 aj.joinWebsite(bim)
 aj.joinWebsite(nu)
+aj.joinWebsite(tam)
 
 aj.addProduct(macbook, aj.signInSession(to));
 aj.addProduct(iphone, aj.signInSession(to))
@@ -39,20 +43,31 @@ aj.addProduct(comChay, aj.signInSession(bim))
 aj.addProduct(shirt, aj.signInSession(nu))
 aj.addProduct(hat, aj.signInSession(nu))
 
+
 aj.addToCart(aj.signInSession(tam), tamComChay)
 aj.addToCart(aj.signInSession(tam), tamIphone)
-aj.addToCart(aj.signInSession(bim), bimMacbook)
+//aj.addToCart(aj.signInSession(bim), bimMacbook)
+//aj.addToCart(aj.signInSession(bim), bimHat)
+aj.addToCart(aj.signInSession(nu), nuIphone)
+//aj.addToCart(aj.signInSession(to), toShirt)
 
-console.log(nightMarket.getCartList())
-console.log("====")
-console.log(dayMarket.getCartList())
+
+
+// console.log(nightMarket.getCartList())
+// console.log("====")
+// console.log(dayMarket.getCartList())
 
 const tamCart = aj.getUserCart(tam)
+//const bimCart = aj.getUserCart(bim)
+//const toCart = aj.getUserCart(to)
+const nuCart = aj.getUserCart(nu)
+//console.log(tamCart, "==", bimCart, "====", toCart, "====", nuCart)
 aj.proceedPayment(tamCart)
-
-
-console.log(aj.findHighestMarketRevenue())
-
+//aj.proceedPayment(bimCart)
+aj.proceedPayment(nuCart)
+//aj.proceedPayment(toCart)
+//console.log(to, bim, nu, tam)
+//console.log(aj.findHighestMarketRevenue())
 //console.log(nightMarket.getProducts())
 
 // aj.signOutSession(bim)
@@ -66,4 +81,9 @@ console.log(aj.findHighestMarketRevenue())
 // console.log(aj.searchProducts(aj.signInSession(to), undefined, "Electronic"))
 // console.log("=======")
 // console.log(aj.searchProducts(aj.signInSession(to), undefined, undefined, { threshold1: 30, threshold2: 1600 }))
+
+//console.log(aj.getMarketReport(nightMarket))
+//aj.findTop3Seller()
+//console.log(to, bim, nu, tam)
+aj.checkActivity()
 

@@ -17,7 +17,8 @@ export class Market {
     protected transaction: Cart[]
     private manager: Employee | undefined
     private cartList: Cart[]
-    constructor(name: string, address: string, regions: Regions[]) {
+    protected launchedDate: luxon.DateTime
+    constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
         this.name = name;
         this.address = address;
         this.revenue = 0;
@@ -27,6 +28,10 @@ export class Market {
         this.transaction = []
         this.manager = undefined
         this.cartList = []
+        this.launchedDate = launchedDate
+    }
+    getLaunchedDate() {
+        return this.launchedDate;
     }
     getAddress() {
         return this.address;
@@ -61,18 +66,6 @@ export class Market {
         return this.cartList;
     }
 
-    getMarketReport() { //23
-        // {
-        //     launchedDate,
-        //     dateExported,
-        //     totalUsers,
-        //     revenue,
-        //     numberOfTransaction,
-        //     marketQuality (revenue/numberOfUser)	
-        // }
-
-    }
-
     // addToCarts(cart: Cart) {
     //     this.cartList.push(cart)
     // }
@@ -80,13 +73,14 @@ export class Market {
         this.isEnabled = false;
         this.transaction = [];
     }
-    public addSellProduct(product: Product, session: Session) { //6
-        product.setOwner(session.getUser())
-        this.sellProducts.push(product)
+    public addSellProduct(product: Product) { //6
+        this.sellProducts.push(product);
+        return this.sellProducts;
     }
 
     public assignManager(manager: Employee) { //18
         this.manager = manager;
+        return this.manager
     }
 
     public findUserInMarket(region: Regions): User[] { //13
@@ -110,14 +104,9 @@ export class Market {
 }
 
 export class SampleMarket extends Market {
-    private lauchedDate: luxon.DateTime
     private shutDownDate: luxon.DateTime | undefined = undefined
     constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
-        super(name, address, regions)
-        this.lauchedDate = launchedDate;
-    }
-    getLaunchedDate() {
-        return this.lauchedDate;
+        super(name, address, regions, launchedDate)
     }
     override shutDown(): void {
         super.shutDown()
@@ -125,13 +114,8 @@ export class SampleMarket extends Market {
     }
 }
 export class MainMarket extends Market {
-    private lauchedDate: luxon.DateTime
     constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
-        super(name, address, regions)
-        this.lauchedDate = launchedDate;
-    }
-    getLaunchedDate() {
-        return this.lauchedDate;
+        super(name, address, regions, launchedDate)
     }
     override shutDown(): void {
         console.log("Unable to shut down!")
