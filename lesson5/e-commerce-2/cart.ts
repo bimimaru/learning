@@ -5,24 +5,25 @@
 import * as luxon from "luxon"
 import { CartItem } from "./cart-item";
 import { User } from "./user"
+import { Status } from "./status";
 
 export class Cart {
     private cartItems: CartItem[]
     private user: User
     private total: number
     private transactionDate: luxon.DateTime | undefined
-    private status: string
+    private status: Status
     constructor(user: User) {
         this.cartItems = [];
         this.user = user;
         this.total = 0;
         this.transactionDate = undefined;
-        this.status = "in Cart"
+        this.status = Status.inCart
     }
     getStatus() {
         return this.status;
     }
-    setStatus(status: string) {
+    setStatus(status: Status) {
         this.status = status;
         return this.status;
     }
@@ -71,7 +72,7 @@ export class Cart {
         }
 
         this.setTransactionDate(luxon.DateTime.now())
-        this.setStatus("Paid")
+        this.setStatus(Status.paid)
 
         return this.total;
     }

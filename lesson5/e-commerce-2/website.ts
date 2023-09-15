@@ -10,6 +10,7 @@ import { Membership } from "./membership"
 import { Market } from "./market/market"
 import { SampleMarket } from "./market/sample-market"
 import { MainMarket } from "./market/main-market"
+import { Status } from "./status"
 
 class Website {
     private name: string
@@ -108,11 +109,11 @@ class Website {
             if (findLastestTransaction) {
                 let diff1 = luxon.Interval.fromDateTimes(findLastestTransaction.getTransactionDate()!, luxon.DateTime.now())
                 let diffYear = diff1.length("years")
-                if (diffYear > 1 && findLastestTransaction.getStatus() != "Point Decreased") {
+                if (diffYear > 1 && findLastestTransaction.getStatus() != Status.decreased) {
                     let point = findLastestTransaction.getUser().getPoint()
                     findLastestTransaction.getUser().decreasePoint(point * 0.3);
                     this.checkPromoteUser(findLastestTransaction.getUser())
-                    findLastestTransaction.setStatus("Point Decreased")
+                    findLastestTransaction.setStatus(Status.decreased)
                 }
             }
         }
