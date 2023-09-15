@@ -88,22 +88,34 @@ class Website {
     }
 
     checkActivity() { //28
-        for (let i = 0; i < this.markets.length; i++) {
-            for (let j = 0; j < this.markets[i].getTransactions().length; j++) {
-                let transactions = this.markets[i].getTransactions()[j]
+        for (let i = 0; i < this.users.length; i++) {
+            let findLastestTransaction: Cart | undefined
+            for (let j = 0; j < this.markets.length; j++) {
+                for (let k = 0; k < this.markets[j].getTransactions().length; k++) {
 
-                if (transactions.getTransactionDate()) {
+                    let transactions = this.markets[j].getTransactions()[k]
                     let diff = luxon.Interval.fromDateTimes(transactions.getTransactionDate()!, luxon.DateTime.now())
-                    let diffYear = diff.length("years")
-                    if (diffYear > 1) {
-                        let point = transactions.getUser().getPoint()
-                        transactions.getUser().decreasePoint(point * 0.3);
-                        this.checkPromoteUser(transactions.getUser())
+                    let diffDays = diff.length("days")
+                    let minDays = 365;
+
+                    if (this.users[i] == transactions.getUser() && diffDays < minDays) {
+                        minDays = diffDays;
+                        findLastestTransaction = transactions
                     }
                 }
             }
+            console.log(findLastestTransaction)
+            if (findLastestTransaction) {
+                let diff1 = luxon.Interval.fromDateTimes(findLastestTransaction.getTransactionDate()!, luxon.DateTime.now())
+                let diffYear = diff1.length("years")
+                if (diffYear > 1 && findLastestTransaction.getStatus() != "Point Decreased") {
+                    let point = findLastestTransaction.getUser().getPoint()
+                    findLastestTransaction.getUser().decreasePoint(point * 0.3);
+                    this.checkPromoteUser(findLastestTransaction.getUser())
+                    findLastestTransaction.setStatus("Point Decreased")
+                }
+            }
         }
-
     }
 
     public proceedPayment(cart: Cart) { //21
