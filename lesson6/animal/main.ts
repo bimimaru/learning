@@ -22,3 +22,5 @@ function run(animals: Run[]) {
         animals[i].run();
     }
 }
+
+run(animals)
