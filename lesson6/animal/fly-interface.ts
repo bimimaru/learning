@@ -1,5 +1,5 @@
-import { Speak } from "./speak-interface";
+import { Speakable } from "./speak-interface";
 
-export interface Fly extends Speak {
+export interface Flyable extends Speakable {
     fly(): void
 }

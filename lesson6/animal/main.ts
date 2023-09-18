@@ -1,15 +1,16 @@
-import { Runnable } from "../transportation/run-interface";
+import { Bat } from "./bat";
 import { Bird } from "./bird";
 import { Cat } from "./cat";
 import { Dog } from "./dog";
 import { Lion } from "./lion";
+import { Runnable } from "./run-interface";
 
 
 const dog = new Dog("Cho", "black")
 const cat = new Cat("Meo", "white")
 const bird = new Bird("Chim", "Grey")
 const lion = new Lion("Su Tu", "yellow")
-
+const bat = new Bat("Batman", "black")
 // dog.speak()
 // cat.run()
 // bird.fly()
@@ -24,3 +25,4 @@ function run(animals: Runnable[]) {
 }
 
 run(animals)
+bat.speak()

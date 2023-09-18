@@ -1,14 +1,14 @@
 import { Animal } from "./animal";
 import { Flyable } from "./fly-interface";
 
-export class Bird extends Animal implements Flyable {
+export class Bat extends Animal implements Flyable {
     constructor(name: string, color: string) {
         super(name, color);
     }
     override speak() {
-        console.log("chip chip")
+        console.log("I'm BATMAN!")
     }
-    fly() {
-        console.log(super.getName() + " can fly.")
+    fly(): void {
+        console.log(this.name + " is flying.")
     }
 }

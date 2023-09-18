@@ -1,3 +1,3 @@
-export interface Speak {
+export interface Speakable {
     speak(): void
 }

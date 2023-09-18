@@ -2,14 +2,14 @@
 // Dog, Cat, Bird are also animals.
 // Animal can speak. But it will behave differently depends on each type.
 
-import { Speak } from "./speak-interface";
+import { Speakable } from "./speak-interface";
 
 // Dog & Cat can run
 // Bird can only fly
 
-export abstract class Animal implements Speak {
-    private name: string
-    private color: string
+export abstract class Animal implements Speakable {
+    name: string
+    color: string
     constructor(name: string, color: string) {
         this.name = name;
         this.color = color;

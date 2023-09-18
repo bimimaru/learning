@@ -1,9 +1,9 @@
 import { Animal } from "./animal";
-import { Run } from "./run-interface";
+import { Runnable } from "./run-interface";
 
-export class Dog extends Animal implements Run {
+export class Dog extends Animal implements Runnable {
     constructor(name: string, color: string) {
-        super(name, color)
+        super(name, color);
     }
     override speak() {
         console.log("gau gau");
