@@ -7,7 +7,7 @@ import { Speak } from "./speak-interface";
 // Dog & Cat can run
 // Bird can only fly
 
-export class Animal implements Speak {
+export abstract class Animal implements Speak {
     private name: string
     private color: string
     constructor(name: string, color: string) {
@@ -17,7 +17,5 @@ export class Animal implements Speak {
     getName() {
         return this.name;
     }
-    speak() {
-        console.log("Animal can talk.")
-    }
+    abstract speak(): void;
 }

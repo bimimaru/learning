@@ -6,7 +6,7 @@ export class Dog extends Animal implements Run {
         super(name, color)
     }
     override speak() {
-        console.log("gau gau")
+        console.log("gau gau");
     }
     run() {
         console.log(super.getName() + " can run.")

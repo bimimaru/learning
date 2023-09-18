@@ -195,7 +195,7 @@ class Website {
         market.shutDown()
     }
 
-    public shutDown(market: Market) { //16
+    public shutDown(market: SampleMarket) { //16
         this.revenue += market.getRevenue();
         market.shutDown()
     }

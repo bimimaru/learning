@@ -1,4 +1,4 @@
 
-export interface Fly {
+export interface Flyable {
     fly(): void;
 }

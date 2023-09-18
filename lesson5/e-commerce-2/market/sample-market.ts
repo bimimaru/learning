@@ -2,9 +2,9 @@ import luxon from "luxon"
 import { Regions } from "../regions"
 import { Market } from "./market"
 import { MainMarket } from "./main-market";
-import { InterfaceMarket } from "./interfaceMarket";
+import { Transferrable } from "./transferrable";
 
-export class SampleMarket extends Market implements InterfaceMarket {
+export class SampleMarket extends Market implements Transferrable {
     private shutDownDate: luxon.DateTime | undefined = undefined
     constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
         super(name, address, regions, launchedDate)

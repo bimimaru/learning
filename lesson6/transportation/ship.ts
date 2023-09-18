@@ -1,7 +1,7 @@
-import { Sail } from "./sail-interface";
+import { Sailable } from "./sail-interface";
 import { Transportation } from "./transportation";
 
-export class Ship extends Transportation implements Sail {
+export class Ship extends Transportation implements Sailable {
     constructor(model: string) {
         super(model)
     }

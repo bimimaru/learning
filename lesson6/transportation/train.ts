@@ -1,7 +1,7 @@
-import { Run } from "./run-interface";
+import { Runnable } from "./run-interface";
 import { Transportation } from "./transportation";
 
-export class Train extends Transportation implements Run {
+export class Train extends Transportation implements Runnable {
     constructor(model: string) {
         super(model)
     }

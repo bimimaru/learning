@@ -1,6 +1,6 @@
 import { Market } from "./market";
 
-export interface InterfaceMarket {
+export interface Transferrable {
     transfer(): Market
     shutDown(): void
 }

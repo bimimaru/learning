@@ -1,3 +1,3 @@
-export interface Sail {
+export interface Sailable {
     sail(): void
 }

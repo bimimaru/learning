@@ -1,8 +1,8 @@
+import { Runnable } from "../transportation/run-interface";
 import { Bird } from "./bird";
 import { Cat } from "./cat";
 import { Dog } from "./dog";
 import { Lion } from "./lion";
-import { Run } from "./run-interface";
 
 
 const dog = new Dog("Cho", "black")
@@ -17,7 +17,7 @@ const lion = new Lion("Su Tu", "yellow")
 
 const animals = [dog, cat, lion]
 
-function run(animals: Run[]) {
+function run(animals: Runnable[]) {
     for (let i = 0; i < animals.length; i++) {
         animals[i].run();
     }

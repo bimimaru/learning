@@ -1,3 +1,3 @@
-export interface Run {
+export interface Runnable {
     run(): void
 }
