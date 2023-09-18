@@ -6,29 +6,24 @@ import { Regions } from "../regions"
 import { User } from "../user"
 import { Employee } from "./../employee";
 
-export class Market {
+export abstract class Market {
     protected name: string
     protected address: string
-    protected revenue: number
+    protected revenue: number = 0
     protected regions: Regions[]
-    protected isEnabled: boolean
-    protected sellProducts: Product[]
-    protected transactions: Cart[]
-    private manager: Employee | undefined
-    private cartList: Cart[]
+    protected isEnabled: boolean = true
+    protected sellProducts: Product[] = []
+    protected transactions: Cart[] = []
+    protected manager: Employee | undefined = undefined
+    protected cartList: Cart[] = []
     protected launchedDate: luxon.DateTime
     constructor(name: string, address: string, regions: Regions[], launchedDate: luxon.DateTime) {
         this.name = name;
         this.address = address;
-        this.revenue = 0;
         this.regions = regions;
-        this.isEnabled = true;
-        this.sellProducts = []
-        this.transactions = []
-        this.manager = undefined
-        this.cartList = []
         this.launchedDate = launchedDate
     }
+
     getLaunchedDate() {
         return this.launchedDate;
     }
@@ -64,19 +59,7 @@ export class Market {
     public getCartList() {
         return this.cartList;
     }
-    public transfer(): Market {
-        // TODO implementation
-        throw new Error("Parent market can not transfer");
 
-    };
-
-    // addToCarts(cart: Cart) {
-    //     this.cartList.push(cart)
-    // }
-    public shutDown() {
-        this.isEnabled = false;
-        this.transactions = [];
-    }
     public addSellProduct(product: Product) { //6
         this.sellProducts.push(product);
         return this.sellProducts;

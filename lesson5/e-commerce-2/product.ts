@@ -25,10 +25,7 @@ class Product {
         this.images = images;
         this.owner = owner;
     }
-    setOwner(owner: User) {
-        this.owner = owner;
-        return this.owner
-    }
+    
     getOwner() {
         return this.owner;
     }
