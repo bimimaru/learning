@@ -7,8 +7,21 @@ export class Chariot extends ChessPiece {
         super(side, position);
     }
 
-    howToMove(): string {
-        throw new Error("Method not implemented.");
+    override howToMove(): string {
+        return "Can go horizontal and vertical unlimitedly."
+    }
+
+    override move(coordinate: Coordinate) {
+        if (this.isEligible(coordinate)) {
+            this.position = coordinate;
+        }
+    }
+    override isEligible(coordinate: Coordinate): boolean {
+        if (this.position.getX() == coordinate.getX() || this.position.getY() == coordinate.getY()) {
+            return true;
+        } else {
+            throw new Error(super.errorCannotMove)
+        }
     }
 
 }
