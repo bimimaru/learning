@@ -1,0 +1,32 @@
+[
+    {
+        "author": "Chinua Achebe",
+        "country": "Nigeria",
+        "imageLink": "images/things-fall-apart.jpg",
+        "year": 1958
+    },
+    {
+        "author": "Hans Christian Andersen",
+        "country": "Denmark",
+        "imageLink": "images/fairy-tales.jpg",
+        "year": 1836
+    },
+    {
+        "author": "Marijn Haverbeke",
+        "country": "Italy",
+        "imageLink": "images/the-divine-comedy.jpg",
+        "year": 1315
+    },
+    {
+        "author": "Axel Rauschmayer",
+        "country": "Sumer and Akkadian Empire",
+        "imageLink": "images/the-epic-of-gilgamesh.jpg",
+        "year": -1700
+    },
+    {
+        "author": "Victor Hugo",
+        "country": "Achaemenid Empire",
+        "imageLink": "images/the-book-of-job.jpg",
+        "year": -600
+    }
+]
