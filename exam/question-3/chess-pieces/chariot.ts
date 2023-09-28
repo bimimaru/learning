@@ -20,7 +20,7 @@ export class Chariot extends ChessPiece {
         if (this.position.getX() == coordinate.getX() || this.position.getY() == coordinate.getY()) {
             return true;
         } else {
-            throw new Error(super.errorCannotMove)
+            throw new Error(ChessPiece.errorCannotMove)
         }
     }
 
