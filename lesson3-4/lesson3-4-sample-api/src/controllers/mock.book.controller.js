@@ -11,9 +11,7 @@ async function getAuthorsHandler(_req, _res) {
 }
 
 function getBookById(id) {
-    const book = mockBooks.find((book) => {
-        return book.isbn === id.toString();
-    });
+    const book = mockBooks.find((book) => book.isbn === id.toString());
 
     return book;
 }
@@ -27,11 +25,11 @@ async function updateLikeStatusOfBookHandler(_req, _res) {
         _res.json(book);
     } else {
         _res.status(404).json({
-            "message": "Book not found!"
-        })
+            message: 'Book not found!',
+        });
     }
 
-    return book
+    return book;
 }
 
 async function getBookByIdHandler(_req, _res) {
@@ -41,8 +39,8 @@ async function getBookByIdHandler(_req, _res) {
         _res.json(book);
     } else {
         _res.status(404).json({
-            "message": "Book not found!"
-        })
+            message: 'Book not found!',
+        });
     }
 }
 

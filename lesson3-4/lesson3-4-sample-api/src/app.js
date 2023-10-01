@@ -1,6 +1,6 @@
 const cors = require('cors');
 const express = require('express');
-const { router } = require('./routers/v1/routers');
+const { router } = require('./routers/v1/mock.routers');
 const { handleErrors } = require('./middlewares/error-handler.middleware');
 
 const app = express();
