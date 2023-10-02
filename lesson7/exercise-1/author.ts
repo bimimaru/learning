@@ -1,3 +1,5 @@
+import { AuthorDTO } from "./author-dto"
+
 export class Author {
     private author: string
     private country: string
@@ -9,7 +11,16 @@ export class Author {
         this.imageLink = imageLink
         this.year = year;
     }
-    getAuthor() {
+    getAuthor(): string {
         return this.author;
+    }
+
+    static mapFromDTO(authorDTO: AuthorDTO): Author {
+        return new Author(
+            authorDTO.author,
+            authorDTO.country,
+            authorDTO.imageLink,
+            authorDTO.year
+        )
     }
 }
