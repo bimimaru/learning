@@ -1,9 +1,34 @@
-const bookService = require('../services/book.service');
 const mockBooks = require('../data/books.json');
 const mockAuthors = require('../data/authors.json');
 
 async function getBookHandler(_req, _res) {
-    _res.json(mockBooks);
+
+    let books;
+
+    const {
+        minPages,
+        maxPages,
+        order,
+        limit,
+        offset
+    } = _req.query;
+
+    books = mockBooks
+        .filter(book => book.pages >= minPages && book.pages <= maxPages)
+        .slice(offset, offset + limit)
+        .sort(
+            (book1, book2) => {
+                if (order !== null) {
+                    const book1Date = new Date(book1.published.replace(/\s/g, '')).getTime();
+                    const book2Date = new Date(book2.published.replace(/\s/g, '')).getTime();
+                    return order ? book1Date - book2Date : book2Date - book1Date
+                } else {
+                    return 0
+                }
+            }
+        )
+
+    _res.json(books);
 }
 
 async function getAuthorsHandler(_req, _res) {
