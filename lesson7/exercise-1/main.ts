@@ -9,24 +9,33 @@ axios.defaults.baseURL = "http://localhost:3000";
 
 let storedBooks: Book[] = []; //4
 async function getBooks(): Promise<Book[]> {//1
-    const result = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS);
-    const data = result.data;
+    try {
+        const result = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS);
+        const data = result.data;
+        storedBooks = []
+        for (let i = 0; i < data.length; i++) {
+            storedBooks.push(Book.mapFromDTO(data[i]))
+        }
 
-    for (let i = 0; i < data.length; i++) {
-        storedBooks.push(Book.mapFromDTO(data[i]))
+        return storedBooks;
+    } catch (e) {
+        console.log(e)
     }
-
-    return storedBooks;
 }
+
 let storedAuthors: Author[] = []; //4
 async function getAuthors(): Promise<Author[]> {
-    const result = await axios.get<AuthorDTO[]>(API_PATH.GET_AUTHORS);
-    const data = result.data;
-
-    for (let i = 0; i < data.length; i++) {
-        storedAuthors.push(Author.mapFromDTO(data[i]))
+    try {
+        const result = await axios.get<AuthorDTO[]>(API_PATH.GET_AUTHORS);
+        const data = result.data;
+        storedAuthors = []
+        for (let i = 0; i < data.length; i++) {
+            storedAuthors.push(Author.mapFromDTO(data[i]))
+        }
+        return storedAuthors;
+    } catch (e) {
+        console.log(e)
     }
-    return storedAuthors;
 }
 
 function searchBookTitle(name: string) { //5
@@ -79,22 +88,57 @@ function searchBookByID(id: string): Book { //7
     return result;
 }
 
-async function unfavoriteBook(bookID: string) { //8
+async function toggleFavoriteBook(bookID: string, favorite: boolean) { //8
     if (searchBookByID(bookID)) {
-        const result = await axios.get(API_PATH.GET_BOOKS + "/" + bookID + "/false");
+        const result = await axios.get(API_PATH.GET_BOOKS + "/" + bookID + "/" + favorite);
+        searchBookByID(bookID).setIsLike(favorite)
         //console.log(result.data)
-        searchBookByID(bookID).setIsLike(false)
         return result.data
     }
 }
 
-async function favoriteBook(bookID: string) { //8
-    if (searchBookByID(bookID)) {
-        const result = await axios.get(API_PATH.GET_BOOKS + "/" + bookID + "/true");
-        searchBookByID(bookID).setIsLike(true)
-        //console.log(result.data)
-        return result.data
+async function getMinPages(minPages: number, limitX: number) {//10
+    let result: Book[] = []
+    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?minPages=" + minPages)
+    let data = foundBooks.data;
+    for (let i = 0; i < data.length; i++) {
+        if (i <= limitX) {
+            result.push(Book.mapFromDTO(data[i]))
+        } else {
+            break;
+        }
     }
+    //console.log(result)
+    return result
+}
+async function getMaxPages(maxPages: number, limitX: number) {//11
+    let result: Book[] = []
+    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?maxPages=" + maxPages)
+    let data = foundBooks.data;
+    for (let i = 0; i < data.length; i++) {
+        if (i <= limitX) {
+            result.push(Book.mapFromDTO(data[i]))
+        } else {
+            break;
+        }
+    }
+    //console.log(result)
+    return result
+}
+async function getMinAndMaxPages(minNumber: number, maxNumber: number, limitX: number) { //12
+    let result: Book[] = []
+    let minPages = await getMinPages(minNumber, limitX)
+    let maxPages = await getMaxPages(maxNumber, limitX)
+    console.log(minPages, "++++++", maxPages)
+    for (let i = 0; i < minPages.length; i++) {
+        for (let j = 0; j < maxPages.length; j++) {
+            if (minPages[i].getID() == maxPages[j].getID()) {
+                result.push(maxPages[j])
+            }
+        }
+    }
+    console.log("=====", result)
+    return result;
 }
 
 function getLikedBooks() { //9
@@ -115,7 +159,8 @@ async function run() {
     setInterval(() => { //6
         getBooks();
         getAuthors();
-    }, 10000);
+        //getLikedBooks()
+    }, 5000);
 
     // try {
     //     searchBookTitle("Harry Potter");
@@ -132,13 +177,15 @@ async function run() {
     //     console.log(e)
     // }
 
-    try {
-        await favoriteBook("9781593277574")
-    } catch (e) {
-        console.log(e)
-    }
+    // try {
+    //     await toggleFavoriteBook("9781593277574", true)
+    // } catch (e) {
+    //     console.log(e)
+    // }
 
-    getLikedBooks()
+    // getLikedBooks()
+
+    getMinAndMaxPages(200, 400, 5)
 }
 
 run();

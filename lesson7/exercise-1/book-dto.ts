@@ -10,4 +10,5 @@ export type BookDTO = {
     pages: number
     description: string
     website: string
+    isLike: boolean
 }

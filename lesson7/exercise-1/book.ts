@@ -11,8 +11,8 @@ export class Book {
     private pages: number
     private description: string
     private website: string
-    private isLike: boolean
-    constructor(isbn: string, title: string, subtitle: string, author: string, published: Date, publisher: string, pages: number, description: string, website: string) {
+    private isLike: boolean | undefined
+    constructor(isbn: string, title: string, subtitle: string, author: string, published: Date, publisher: string, pages: number, description: string, website: string, isLike: boolean | undefined) {
         this.isbn = isbn
         this.title = title
         this.subtitle = subtitle
@@ -22,6 +22,7 @@ export class Book {
         this.pages = pages;
         this.description = description;
         this.website = website;
+        this.isLike = isLike;
     }
     public getTitle(): string {
         return this.title;
@@ -53,6 +54,7 @@ export class Book {
             bookDTO.pages,
             bookDTO.description,
             bookDTO.website,
+            bookDTO.isLike
         )
     }
 
