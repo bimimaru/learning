@@ -1,4 +1,4 @@
-import axios from "axios";
+import * as axios from "axios";
 import { Author } from "./author";
 import { Book } from "./book"
 import { BookDTO } from "./book-dto";
@@ -97,48 +97,41 @@ async function toggleFavoriteBook(bookID: string, favorite: boolean) { //8
     }
 }
 
-async function getMinPages(minPages: number, limitX: number) {//10
-    let result: Book[] = []
-    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?minPages=" + minPages)
+async function getMinPages(minPages: number, limitX: number, offset: number) {//10
+
+    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?minPages=" + minPages + "&limit=" + limitX + "&offset=" + offset)
     let data = foundBooks.data;
-    for (let i = 0; i < data.length; i++) {
-        if (i <= limitX) {
-            result.push(Book.mapFromDTO(data[i]))
-        } else {
-            break;
-        }
-    }
-    //console.log(result)
-    return result
+
+    return data.map((rawValue) => {
+        return Book.mapFromDTO(rawValue)
+    })
 }
-async function getMaxPages(maxPages: number, limitX: number) {//11
-    let result: Book[] = []
-    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?maxPages=" + maxPages)
+
+async function getMaxPages(maxPages: number, limitX: number, offset: number) {//11
+
+    let foundBooks = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?maxPages=" + maxPages + "&limit=" + limitX + "&offset=" + offset)
     let data = foundBooks.data;
-    for (let i = 0; i < data.length; i++) {
-        if (i <= limitX) {
-            result.push(Book.mapFromDTO(data[i]))
-        } else {
-            break;
-        }
-    }
-    //console.log(result)
-    return result
+
+    return data.map((rawValue) => Book.mapFromDTO(rawValue))
 }
-async function getMinAndMaxPages(minNumber: number, maxNumber: number, limitX: number) { //12
-    let result: Book[] = []
-    let minPages = await getMinPages(minNumber, limitX)
-    let maxPages = await getMaxPages(maxNumber, limitX)
-    console.log(minPages, "++++++", maxPages)
-    for (let i = 0; i < minPages.length; i++) {
-        for (let j = 0; j < maxPages.length; j++) {
-            if (minPages[i].getID() == maxPages[j].getID()) {
-                result.push(maxPages[j])
-            }
-        }
-    }
-    console.log("=====", result)
-    return result;
+
+async function getMinAndMaxPages(minNumber: number, maxNumber: number, limitX: number, offset: number | undefined = 0, order: boolean | undefined = undefined) { //12
+    // tera condition
+
+    let foundBooks = await axios.get<BookDTO[]>(
+        API_PATH.GET_BOOKS +
+            "?minPages=" + minNumber +
+            "&maxPages=" + maxNumber +
+            "&limit=" + limitX +
+            "&offset=" + offset +
+            order ? "&order=" + order : ""
+    );
+
+    let data = foundBooks.data;
+
+    return data.map((rawValue) => {
+        return Book.mapFromDTO(rawValue)
+    })
 }
 
 function getLikedBooks() { //9
@@ -150,6 +143,14 @@ function getLikedBooks() { //9
     }
     console.log(result)
     return result;
+}
+
+async function getLastBook() { //17
+    let books = await getBooks()
+    let length = books.length - 1
+    let result = await axios.get<BookDTO[]>(API_PATH.GET_BOOKS + "?limit=1&offset=" + length)
+    let data = result.data
+    return data.map((rawValue) => Book.mapFromDTO(rawValue))
 }
 
 async function run() {
@@ -185,7 +186,17 @@ async function run() {
 
     // getLikedBooks()
 
-    getMinAndMaxPages(200, 400, 5)
+    // getMinAndMaxPages(200, 400, 5)
+
+
+    //15.  Get books has pages from 100 -> 500 sorted by published date descending and limit by 3
+    //console.log(await getMinAndMaxPages(100, 500, 3, 0, false))
+
+    //16
+    //console.log(await getMinAndMaxPages(300, 400, 3, 1, false))
+
+    //17
+    console.log(await getLastBook())
 }
 
 run();
