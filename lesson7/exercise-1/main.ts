@@ -199,8 +199,3 @@ async function run() {
     console.log(await getLastBook())
 }
 run();
-
-console.log("Hello");
-
-
-
