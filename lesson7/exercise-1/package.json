@@ -8,14 +8,16 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "ts-node main.ts",
         "build": "tsc main.ts --outDir dist",
-        "start:prod": "node dist/main.js"
+        "start:prod": "node dist/main.js",
+        "start:dev": "nodemon main.ts"
     },
     "author": "Bim",
     "license": "ISC",
     "devDependencies": {
         "@types/node": "^20.5.7",
         "ts-node": "^10.9.1",
-        "typescript": "^5.2.2"
+        "typescript": "^5.2.2",
+        "nodemon": "^3.0.1"
     },
     "dependencies": {
         "axios": "^1.5.1"
