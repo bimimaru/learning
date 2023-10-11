@@ -39,10 +39,14 @@ export class ProductService {
         const productIndex = this.products.findIndex(product => product.id === id);
 
         if (productIndex >= 0) {
-            const newProduct = {
-                ...this.products[productIndex],
-                ...updateProduct,
+            const newProduct: Product = {
+                id: this.products[productIndex].id,
+                category: updateProduct.category,
+                name: updateProduct.name,
+                price: updateProduct.price,
+                enabled: this.products[productIndex].enabled,
             }
+
             this.products[productIndex] = newProduct
             return newProduct
         } else {
