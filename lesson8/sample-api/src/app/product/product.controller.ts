@@ -53,6 +53,18 @@ export class ProductController {
     }
 
     @Delete("/:id")
+    @ApiOkResponse({
+        description: "Product found",
+        schema: {
+            example: BaseResponse.success<Product>({
+                category: "string",
+                id: "id",
+                name: "name",
+                price: 0,
+                enabled: false
+            })
+        }
+    })
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: "Product not found",
